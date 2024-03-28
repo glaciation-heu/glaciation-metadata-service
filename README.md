@@ -7,29 +7,29 @@ to read information from it and edit information in it.
 
 ## Development
 
-## Requirements
+### Requirements
 Python 3.10+
 
-## Installation
+### Installation
 ```bash
 pip install pre-commit
 pre-commit install
 ```
 
-## Working on a server
+### Working on a server
 Go to the `/server` folder to install dependencies and work on the server application.  
 Documentation on setting up the virtual environment, installing dependencies, and working with the server can be found [here](./server/README.md).
 
-## Working on a client
+### Working on a client
 Go to the `/client` folder to install dependencies and work on the client application.  
 Documentation on setting up the virtual environment, installing dependencies, and working with the client can be found [here](./client/README.md).
 
-## Release
+### Release
 The application version is specified in the VERSION file. The version should follow the format a.a.a, where 'a' is a number.  
 To create a release, update the version in the VERSION file and add a tag in GIT.  
 The release version for branches, pull requests, and tags will be generated based on the base version in the VERSION file.
 
-## GitHub Actions
+### GitHub Actions
 GitHub Actions triggers testing, builds, and application publishing for each release.  
 https://docs.github.com/en/actions  
 
@@ -61,7 +61,7 @@ The index.yaml file containing the list of Helm charts will be available at `htt
 A package of the client will be available at pypi.org.  
 The Docker image will be available at `https://github.com/orgs/<workspace>/packages?repo_name=<project>`.
 
-## Act
+### Act
 You can run your GitHub Actions locally using https://github.com/nektos/act. 
 
 Usage example:
@@ -69,5 +69,5 @@ Usage example:
 act push -j test_and_build_client --secret-file my.secrets
 ```
 
-# Collaboration guidelines
+### Collaboration guidelines
 HIRO uses and requires from its partners [GitFlow with Forks](https://hirodevops.notion.site/GitFlow-with-Forks-3b737784e4fc40eaa007f04aed49bb2e?pvs=4)
