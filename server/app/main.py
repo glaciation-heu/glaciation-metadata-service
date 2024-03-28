@@ -13,7 +13,7 @@ class CustomFastAPI(FastAPI):
             return self.openapi_schema
         openapi_schema = get_openapi(
             title="Template web service",
-            version="0.0.0",
+            version="0.1.0",
             description="This is a template of a web service",
             contact={
                 "name": "HIRO-MicroDataCenters",
