@@ -21,22 +21,10 @@ paths:
           content:
             application/json:
               schema: {}
-  /:
-    get:
-      summary: Example endpoint
-      description: Example endpoint that returns test data
-      operationId: example__get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExampleResponse'
   /item/:
     get:
       tags:
-      - items
+      - Items
       summary: Read all items
       description: Read all items from the storage
       operationId: items__read_all
@@ -46,22 +34,22 @@ paths:
           content:
             application/json:
               schema:
+                type: array
                 items:
                   $ref: '#/components/schemas/Item'
-                type: array
                 title: Response Items  Read All
     post:
       tags:
-      - items
+      - Items
       summary: Create an item
       description: Create a new item in the storage
       operationId: items__create
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Item'
-        required: true
       responses:
         '201':
           description: Successful Response
@@ -78,7 +66,7 @@ paths:
   /item/{id}/:
     get:
       tags:
-      - items
+      - Items
       summary: Read an item
       description: Read item from the storage
       operationId: items__read_item
@@ -104,7 +92,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     put:
       tags:
-      - items
+      - Items
       summary: Update an item
       description: Update an item in the storage
       operationId: items__update_item
@@ -136,7 +124,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
     delete:
       tags:
-      - items
+      - Items
       summary: Delete an item
       description: Delete an item from the storage
       operationId: items__delete_item
@@ -158,18 +146,6 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    ExampleResponse:
-      properties:
-        value:
-          type: string
-          title: Value
-      type: object
-      required:
-      - value
-      title: ExampleResponse
-      description: Example data
-      examples:
-      - value: test value
     HTTPValidationError:
       properties:
         detail:

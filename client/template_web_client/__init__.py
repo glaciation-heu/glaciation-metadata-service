@@ -18,8 +18,8 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from template_web_client.api.default_api import DefaultApi
 from template_web_client.api.items_api import ItemsApi
+from template_web_client.api.default_api import DefaultApi
 
 # import ApiClient
 from template_web_client.api_response import ApiResponse
@@ -33,7 +33,6 @@ from template_web_client.exceptions import ApiAttributeError
 from template_web_client.exceptions import ApiException
 
 # import models into sdk package
-from template_web_client.models.example_response import ExampleResponse
 from template_web_client.models.http_validation_error import HTTPValidationError
 from template_web_client.models.item import Item
 from template_web_client.models.validation_error import ValidationError

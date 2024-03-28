@@ -8,13 +8,11 @@
 
 from typing import Optional
 
-from enum import Enum
-
 from classy_fastapi import Routable, delete, get, post, put
 from fastapi import HTTPException, status
 from pydantic import BaseModel
 
-TAGS: list[str | Enum] = ["items"]
+from app.consts import TagEnum
 
 
 class Item(BaseModel):
@@ -66,7 +64,7 @@ class ItemRoutes(Routable):
         operation_id="items__read_all",
         summary="Read all items",
         response_model=list[Item],
-        tags=TAGS,
+        tags=[TagEnum.ITEMS],
     )
     async def read_items(self) -> list[Item]:
         """Read all items from the storage"""
@@ -78,7 +76,7 @@ class ItemRoutes(Routable):
         summary="Create an item",
         response_model=Item,
         status_code=status.HTTP_201_CREATED,
-        tags=TAGS,
+        tags=[TagEnum.ITEMS],
     )
     async def create_item(self, item: Item) -> Item:
         """Create a new item in the storage"""
@@ -92,7 +90,7 @@ class ItemRoutes(Routable):
         operation_id="items__read_item",
         summary="Read an item",
         response_model=Item,
-        tags=TAGS,
+        tags=[TagEnum.ITEMS],
     )
     async def read_item(self, id: int) -> Item | None:
         """Read item from the storage"""
@@ -106,7 +104,7 @@ class ItemRoutes(Routable):
         operation_id="items__update_item",
         summary="Update an item",
         response_model=Item,
-        tags=TAGS,
+        tags=[TagEnum.ITEMS],
     )
     async def update_item(self, id: int, item: Item) -> Item:
         """Update an item in the storage"""
@@ -121,7 +119,7 @@ class ItemRoutes(Routable):
         summary="Delete an item",
         status_code=status.HTTP_204_NO_CONTENT,
         response_model=None,
-        tags=TAGS,
+        tags=[TagEnum.ITEMS],
     )
     async def delete_item(self, id: int) -> None:
         """Delete an item from the storage"""
