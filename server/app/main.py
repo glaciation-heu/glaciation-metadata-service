@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from . import example, items
+from app import example, items
 
 
 class CustomFastAPI(FastAPI):
