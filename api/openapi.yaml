@@ -7,129 +7,21 @@ info:
     url: https://github.com/glaciation-heu/glaciaition-metadata-service/blob/main/LICENSE
   version: 0.1.0
 paths:
-  /item/:
-    get:
+  /api/v0/graph:
+    patch:
       tags:
-      - Items
-      summary: Read all items
-      description: Read all items from the storage
-      operationId: items__read_all
+      - Graph
+      summary: Update Graph
+      description: Update Distributed Knowledge Graph
+      operationId: update_graph_api_v0_graph_patch
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Item'
-                title: Response Items  Read All
-    post:
-      tags:
-      - Items
-      summary: Create an item
-      description: Create a new item in the storage
-      operationId: items__create
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Item'
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /item/{id}/:
-    get:
-      tags:
-      - Items
-      summary: Read an item
-      description: Read item from the storage
-      operationId: items__read_item
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    put:
-      tags:
-      - Items
-      summary: Update an item
-      description: Update an item in the storage
-      operationId: items__update_item
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Id
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Item'
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Item'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-    delete:
-      tags:
-      - Items
-      summary: Delete an item
-      description: Delete an item from the storage
-      operationId: items__delete_item
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: integer
-          title: Id
-      responses:
-        '204':
-          description: Successful Response
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+                type: string
+                title: Response Update Graph Api V0 Graph Patch
   /metrics:
     get:
       tags:
@@ -143,51 +35,3 @@ paths:
           content:
             application/json:
               schema: {}
-components:
-  schemas:
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    Item:
-      properties:
-        id:
-          type: integer
-          title: Id
-        name:
-          type: string
-          title: Name
-      type: object
-      required:
-      - id
-      - name
-      title: Item
-      examples:
-      - id: 1
-        name: test name
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError

@@ -17,7 +17,7 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from template_web_client.api.items_api import ItemsApi
+from template_web_client.api.graph_api import GraphApi
 from template_web_client.api.monitoring_api import MonitoringApi
 
 # import ApiClient
@@ -32,7 +32,3 @@ from template_web_client.exceptions import ApiAttributeError
 from template_web_client.exceptions import ApiException
 
 # import models into sdk package
-from template_web_client.models.http_validation_error import HTTPValidationError
-from template_web_client.models.item import Item
-from template_web_client.models.validation_error import ValidationError
-from template_web_client.models.validation_error_loc_inner import ValidationErrorLocInner

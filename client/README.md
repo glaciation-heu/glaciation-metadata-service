@@ -105,16 +105,15 @@ configuration = template_web_client.Configuration(
 # Enter a context with an instance of the API client
 with template_web_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = template_web_client.ItemsApi(api_client)
-    item = template_web_client.Item() # Item | 
+    api_instance = template_web_client.GraphApi(api_client)
 
     try:
-        # Create an item
-        api_response = api_instance.items_create(item)
-        print("The response of ItemsApi->items_create:\n")
+        # Update Graph
+        api_response = api_instance.update_graph_api_v0_graph_patch()
+        print("The response of GraphApi->update_graph_api_v0_graph_patch:\n")
         pprint(api_response)
     except ApiException as e:
-        print("Exception when calling ItemsApi->items_create: %s\n" % e)
+        print("Exception when calling GraphApi->update_graph_api_v0_graph_patch: %s\n" % e)
 
 ```
 
@@ -124,20 +123,12 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*ItemsApi* | [**items_create**](docs/ItemsApi.md#items_create) | **POST** /item/ | Create an item
-*ItemsApi* | [**items_delete_item**](docs/ItemsApi.md#items_delete_item) | **DELETE** /item/{id}/ | Delete an item
-*ItemsApi* | [**items_read_all**](docs/ItemsApi.md#items_read_all) | **GET** /item/ | Read all items
-*ItemsApi* | [**items_read_item**](docs/ItemsApi.md#items_read_item) | **GET** /item/{id}/ | Read an item
-*ItemsApi* | [**items_update_item**](docs/ItemsApi.md#items_update_item) | **PUT** /item/{id}/ | Update an item
+*GraphApi* | [**update_graph_api_v0_graph_patch**](docs/GraphApi.md#update_graph_api_v0_graph_patch) | **PATCH** /api/v0/graph | Update Graph
 *MonitoringApi* | [**metrics_metrics_get**](docs/MonitoringApi.md#metrics_metrics_get) | **GET** /metrics | Metrics
 
 
 ## Documentation For Models
 
- - [HTTPValidationError](docs/HTTPValidationError.md)
- - [Item](docs/Item.md)
- - [ValidationError](docs/ValidationError.md)
- - [ValidationErrorLocInner](docs/ValidationErrorLocInner.md)
 
 
 <a id="documentation-for-authorization"></a>

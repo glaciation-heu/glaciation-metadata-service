@@ -14,7 +14,3 @@
 
 
 # import models into model package
-from template_web_client.models.http_validation_error import HTTPValidationError
-from template_web_client.models.item import Item
-from template_web_client.models.validation_error import ValidationError
-from template_web_client.models.validation_error_loc_inner import ValidationErrorLocInner
