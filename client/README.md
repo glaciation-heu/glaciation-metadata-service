@@ -129,7 +129,7 @@ Class | Method | HTTP request | Description
 *ItemsApi* | [**items_read_all**](docs/ItemsApi.md#items_read_all) | **GET** /item/ | Read all items
 *ItemsApi* | [**items_read_item**](docs/ItemsApi.md#items_read_item) | **GET** /item/{id}/ | Read an item
 *ItemsApi* | [**items_update_item**](docs/ItemsApi.md#items_update_item) | **PUT** /item/{id}/ | Update an item
-*DefaultApi* | [**metrics_metrics_get**](docs/DefaultApi.md#metrics_metrics_get) | **GET** /metrics | Metrics
+*MonitoringApi* | [**metrics_metrics_get**](docs/MonitoringApi.md#metrics_metrics_get) | **GET** /metrics | Metrics
 
 
 ## Documentation For Models

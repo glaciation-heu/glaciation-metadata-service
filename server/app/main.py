@@ -5,6 +5,7 @@ from fastapi.openapi.utils import get_openapi
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app import items, root
+from app.consts import TagEnum
 
 
 class CustomFastAPI(FastAPI):
@@ -31,10 +32,8 @@ class CustomFastAPI(FastAPI):
 
 
 app = CustomFastAPI()
-
-
-Instrumentator().instrument(app).expose(app)
-
-
 app.include_router(root.router)
 app.include_router(items.routes.router)
+
+
+Instrumentator().instrument(app).expose(app, tags=[TagEnum.MONITORING])

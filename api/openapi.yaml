@@ -7,17 +7,6 @@ info:
     url: https://github.com/glaciation-heu/glaciaition-metadata-service/blob/main/LICENSE
   version: 0.1.0
 paths:
-  /metrics:
-    get:
-      summary: Metrics
-      description: Endpoint that serves Prometheus metrics.
-      operationId: metrics_metrics_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
   /item/:
     get:
       tags:
@@ -141,6 +130,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /metrics:
+    get:
+      tags:
+      - Monitoring
+      summary: Metrics
+      description: Endpoint that serves Prometheus metrics.
+      operationId: metrics_metrics_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
 components:
   schemas:
     HTTPValidationError:

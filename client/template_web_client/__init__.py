@@ -18,7 +18,7 @@ __version__ = "1.0.0"
 
 # import apis into sdk package
 from template_web_client.api.items_api import ItemsApi
-from template_web_client.api.default_api import DefaultApi
+from template_web_client.api.monitoring_api import MonitoringApi
 
 # import ApiClient
 from template_web_client.api_response import ApiResponse
