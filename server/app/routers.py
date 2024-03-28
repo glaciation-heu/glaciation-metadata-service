@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Body
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
@@ -20,6 +22,16 @@ async def read_root() -> RedirectResponse:
 @router.patch(
     "/api/v0/graph",
 )
-async def update_graph() -> str:
+async def update_graph(
+    body: Annotated[
+        dict,
+        Body(
+            description=(
+                "Request body must be in JSON-LD format. "
+                "It must be compatible with GLACIATION metadata upper ontology."
+            ),
+        ),
+    ]
+) -> str:
     """Update Distributed Knowledge Graph"""
     return "Success"

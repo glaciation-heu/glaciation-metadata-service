@@ -14,6 +14,15 @@ paths:
       summary: Update Graph
       description: Update Distributed Knowledge Graph
       operationId: update_graph_api_v0_graph_patch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Request body must be in JSON-LD format. It must be compatible
+                with GLACIATION metadata upper ontology.
+              title: Body
       responses:
         '200':
           description: Successful Response
@@ -22,6 +31,12 @@ paths:
               schema:
                 type: string
                 title: Response Update Graph Api V0 Graph Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /metrics:
     get:
       tags:
@@ -35,3 +50,35 @@ paths:
           content:
             application/json:
               schema: {}
+components:
+  schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
