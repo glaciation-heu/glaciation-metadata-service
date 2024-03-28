@@ -1,13 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Template web service
-  description: This is a template of a web service
-  contact:
-    name: HIRO-MicroDataCenters
-    email: all-hiro@hiro-microdatacenters.nl
+  title: GLACIATION Metadata Service
+  description: The service exposes API to work with Distributed Knowledge Graph
   license:
-    name: MIT
-    url: https://github.com/HIRO-MicroDataCenters-BV/template-python/blob/main/LICENSE
+    name: MIT License
+    url: https://github.com/glaciation-heu/glaciaition-metadata-service/blob/main/LICENSE
   version: 0.1.0
 paths:
   /metrics:

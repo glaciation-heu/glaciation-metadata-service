@@ -148,6 +148,6 @@ Endpoints do not require authorization.
 
 ## Author
 
-all-hiro@hiro-microdatacenters.nl
+
 
 

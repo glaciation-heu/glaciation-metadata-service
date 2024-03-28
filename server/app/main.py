@@ -12,17 +12,17 @@ class CustomFastAPI(FastAPI):
         if self.openapi_schema:
             return self.openapi_schema
         openapi_schema = get_openapi(
-            title="Template web service",
+            title="GLACIATION Metadata Service",
             version="0.1.0",
-            description="This is a template of a web service",
-            contact={
-                "name": "HIRO-MicroDataCenters",
-                "email": "all-hiro@hiro-microdatacenters.nl",
-            },
+            description=(
+                "The service exposes API to work with Distributed Knowledge Graph"
+            ),
             license_info={
-                "name": "MIT",
-                "url": "https://github.com/HIRO-MicroDataCenters-BV"
-                "/template-python/blob/main/LICENSE",
+                "name": "MIT License",
+                "url": (
+                    "https://github.com/glaciation-heu"
+                    "/glaciaition-metadata-service/blob/main/LICENSE"
+                ),
             },
             routes=self.routes,
         )

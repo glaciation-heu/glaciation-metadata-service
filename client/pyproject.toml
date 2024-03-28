@@ -5,11 +5,11 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "template_web_client"
 version = "0.1.0"
-description = "Client for Template web service"
-authors = ["HIRO-MicroDataCenters <all-hiro@hiro-microdatacenters.nl>"]
-license = "MIT"
+description = "Client for GLACIATION Metadata Service"
+authors = ["OpenAPI Generator Community <team@openapitools.org>"]
+license = "MIT License"
 readme = "README.md"
-keywords = ["OpenAPI", "OpenAPI-Generator", "Template web service"]
+keywords = ["OpenAPI", "OpenAPI-Generator", "GLACIATION Metadata Service"]
 include = ["template_web_client/py.typed"]
 
 [tool.poetry.dependencies]
