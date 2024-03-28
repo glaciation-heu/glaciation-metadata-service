@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Body
 from starlette.responses import RedirectResponse
@@ -24,7 +24,7 @@ async def read_root() -> RedirectResponse:
 )
 async def update_graph(
     body: Annotated[
-        dict,
+        dict[str, Any],
         Body(
             description=(
                 "Request body must be in JSON-LD format. "
