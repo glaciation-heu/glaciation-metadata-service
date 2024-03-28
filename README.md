@@ -1,7 +1,7 @@
 # GLACIATION Metadata Service
 
 ## About
-The component provides access to the DKG to all other services and components and allows
+The component provides access to the Distributed Knowledge Graph to all other services and components and allows
 to read information from it and edit information in it.
 
 

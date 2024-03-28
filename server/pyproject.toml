@@ -3,14 +3,14 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "template-python"
-version = "0.0.0"
-description = "Web service template in Python for reuse."
+name = "glaciation-metadata-service"
+version = "0.0.1"
+description = "Web service for API axess to Distributed Knowledge Graph."
 readme = "README.md"
 authors = ["HIRO-MicroDataCenters <all-hiro@hiro-microdatacenters.nl>"]
 license = "MIT"
-repository = "https://github.com/HIRO-MicroDataCenters-BV/python-service-template"
-homepage = "https://github.com/HIRO-MicroDataCenters-BV/python-service-template"
+repository = "https://github.com/HIRO-MicroDataCenters-BV/glaciaition-metadata-service/settings"
+homepage = "https://github.com/HIRO-MicroDataCenters-BV/glaciaition-metadata-service/settings"
 packages = [{include = "*", from="app"}]
 
 [tool.poetry.dependencies]
