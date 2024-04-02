@@ -4,7 +4,6 @@
 The component provides access to the Distributed Knowledge Graph to all other services and components and allows
 to read information from it and edit information in it.
 
-
 ## Development
 
 ### Requirements
