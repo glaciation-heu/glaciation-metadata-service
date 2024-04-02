@@ -57,7 +57,7 @@ jobs:
           poetry run --directory server python ./tools/extract_openapi.py app.main:app --app-dir ./server --out ./api/openapi_generated.yaml --app_version_file ./VERSION
           git diff --exit-code ./api/openapi.yaml ./api/openapi_generated.yaml
 
-# Disabled becasue we do not need a client yet
+# Disabled because we do not need a client yet
 #      - name: Verify client has been updated
 #        run: |
 #          cd "${{ github.workspace }}"
