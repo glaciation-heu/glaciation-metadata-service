@@ -18,6 +18,6 @@ def test__read_root__redirected() -> None:
 
 
 def test__update_graph__redirected() -> None:
-    response = client.patch("/api/v0/graph")
+    response = client.patch("/api/v0/graph", json={})
     assert response.status_code == HTTP_200_OK
     assert response.json() == "Success"
