@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "glaciation-metadata-service"
-version = "0.1.1"
+version = "0.1.2"
 description = "Web service for API axess to Distributed Knowledge Graph."
 readme = "README.md"
 authors = ["HIRO-MicroDataCenters <all-hiro@hiro-microdatacenters.nl>"]
