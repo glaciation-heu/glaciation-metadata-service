@@ -20,10 +20,6 @@ pre-commit install
 Go to the `/server` folder to install dependencies and work on the server application.  
 Documentation on setting up the virtual environment, installing dependencies, and working with the server can be found [here](./server/README.md).
 
-### Working on a client
-Go to the `/client` folder to install dependencies and work on the client application.  
-Documentation on setting up the virtual environment, installing dependencies, and working with the client can be found [here](./client/README.md).
-
 ### Release
 The application version is specified in the VERSION file. The version should follow the format a.a.a, where 'a' is a number.  
 To create a release, update the version in the VERSION file and add a tag in GIT.  
