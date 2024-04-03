@@ -1,5 +1,5 @@
 apiVersion: v2
-name: glaciaition-metadata-service
+name: glaciation-metadata-service
 description: GLACIATION Metadata service
 type: application
 version: ""
