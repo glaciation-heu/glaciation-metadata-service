@@ -9,8 +9,8 @@ description = "Web service for API axess to Distributed Knowledge Graph."
 readme = "README.md"
 authors = ["HIRO-MicroDataCenters <all-hiro@hiro-microdatacenters.nl>"]
 license = "MIT"
-repository = "https://github.com/glaciation-heu/glaciaition-metadata-service"
-homepage = "https://github.com/glaciation-heu/glaciaition-metadata-service"
+repository = "https://github.com/glaciation-heu/glaciation-metadata-service"
+homepage = "https://github.com/glaciation-heu/glaciation-metadata-service"
 packages = [{include = "*", from="app"}]
 
 [tool.poetry.dependencies]

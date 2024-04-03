@@ -22,7 +22,7 @@ class CustomFastAPI(FastAPI):
                 "name": "MIT License",
                 "url": (
                     "https://github.com/glaciation-heu"
-                    "/glaciaition-metadata-service/blob/main/LICENSE"
+                    "/glaciation-metadata-service/blob/main/LICENSE"
                 ),
             },
             routes=self.routes,

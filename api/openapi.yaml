@@ -4,7 +4,7 @@ info:
   description: The service exposes API to work with Distributed Knowledge Graph
   license:
     name: MIT License
-    url: https://github.com/glaciation-heu/glaciaition-metadata-service/blob/main/LICENSE
+    url: https://github.com/glaciation-heu/glaciation-metadata-service/blob/main/LICENSE
   version: 0.1.6
 paths:
   /api/v0/graph:
