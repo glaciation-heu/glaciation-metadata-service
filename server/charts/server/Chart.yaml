@@ -1,6 +1,6 @@
 apiVersion: v2
-name: server
-description: Web server
+name: glaciaition-metadata-service
+description: GLACIATION Metadata service
 type: application
 version: ""
 appVersion: ""
