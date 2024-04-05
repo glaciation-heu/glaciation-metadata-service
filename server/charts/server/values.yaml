@@ -37,4 +37,4 @@ readinessProbe:
     path: /
     port: http
 
-ingressHostName: {{ include "app.fullname" . }}
+ingressHostName: metadata-service.integration
