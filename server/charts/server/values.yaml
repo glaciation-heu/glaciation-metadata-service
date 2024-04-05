@@ -36,3 +36,5 @@ readinessProbe:
   httpGet:
     path: /
     port: http
+
+ingressHostName: {{ include "app.fullname" . }}
