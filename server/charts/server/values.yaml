@@ -37,4 +37,4 @@ readinessProbe:
     path: /
     port: http
 
-ingressHostName: metadata-service.integration
+ingressHostName: metadata-service
