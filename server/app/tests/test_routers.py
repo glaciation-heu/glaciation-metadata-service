@@ -1,3 +1,5 @@
+from json import load
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER
@@ -18,14 +20,11 @@ def test__read_root__redirected() -> None:
 
 
 def test__update_graph__redirected() -> None:
+    with open("app/tests/stub_message.jsonld", "r") as f:
+        json_input = load(f)
     response = client.patch(
         "/api/v0/graph",
-        json={
-            "sparql": """PREFIX ns1: <http://dellemc.com:8080/icv/> PREFIX schema:
-            <https://schema.org/> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-
-            ns#> DELETE DATA {  <urn:ngsi-ld:Vehicle:5FSQC8LARN> ns1:driverSeatLocation
-            'Right'^^schema:steeringPosition .}"""
-        },
+        json=json_input,
     )
     assert response.status_code == HTTP_200_OK
     assert response.json() == "Success"

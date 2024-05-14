@@ -1,0 +1,36 @@
+{
+    "@context": {
+        "gla": "http://glaciation-project.eu/model/",
+        "cluster": "https://127.0.0.1:6443/",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    },
+    "@graph": [
+        {
+            "@id": "cluster:tenant1-pool-0-1",
+            "@type": "gla:Pod",
+            "gla:has-annotation": {
+                "@set": [
+                    "min.io/revision:0"
+                ]
+            },
+            "gla:has-label": {
+                "@set": [
+                    "apps.kubernetes.io/pod-index:1",
+                    "controller-revision-hash:tenant1-pool-0-6b769f799d",
+                    "statefulset.kubernetes.io/pod-name:tenant1-pool-0-1",
+                    "v1.min.io/console:tenant1-console",
+                    "v1.min.io/pool:pool-0",
+                    "v1.min.io/tenant:tenant1"
+                ]
+            },
+            "gla:is-scheduled-by": "default-scheduler",
+            "gla:pod-phase": "Pending",
+            "gla:qos-class": "Burstable"
+        },
+        {
+            "@id": "cluster:tenant1-pool-0.9dcbaee2-a251-46f3-ab61-1a44934ae1f2",
+            "@type": "gla:StatefulSet",
+            "gla:refers-to": "cluster:tenant1-pool-0-1"
+        }
+    ]
+}

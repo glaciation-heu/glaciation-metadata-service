@@ -1,6 +1,10 @@
 from typing import Annotated, Any
 
+from io import StringIO
+from json import dumps
+
 from fastapi import APIRouter, Body
+from rdflib import Graph
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
@@ -42,7 +46,17 @@ async def update_graph(
     ]
 ) -> str:
     """Update Distributed Knowledge Graph"""
-    if "sparql" in body:
-        fuseki.update_query(body["sparql"])
-        return "Success"
-    return "Failure"
+    g = Graph()
+    g.parse(StringIO(dumps(body)), format="json-ld")
+
+    query = "INSERT DATA {\n"
+    for s, p, o in g.triples((None, None, None)):
+        if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
+            query += "\t" + s.n3() + " " + p.n3() + " " + o.n3() + " .\n"
+        else:
+            return "Failure"
+    query += "}"
+
+    fuseki.update_query(query)
+
+    return "Success"
