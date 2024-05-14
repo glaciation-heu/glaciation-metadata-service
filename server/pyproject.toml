@@ -20,6 +20,7 @@ uvicorn = "^0.26"
 classy-fastapi = "^0.6.1"
 prometheus-fastapi-instrumentator = "^6.1.0"
 pre-commit = "^3.7.0"
+sparqlwrapper = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12"

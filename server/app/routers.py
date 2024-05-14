@@ -6,8 +6,14 @@ from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import TagEnum
 
+from app.FusekiCommunicator import FusekiCommunicatior
+
 router = APIRouter(tags=[TagEnum.GRAPH])
 
+fuseki_jena_url = "localhost"
+fuseki_jena_port = 3030
+fuseki_jena_dataset_name = "slice"
+fuseki = FusekiCommunicatior(fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name)
 
 @router.get(
     "/",
@@ -34,4 +40,7 @@ async def update_graph(
     ]
 ) -> str:
     """Update Distributed Knowledge Graph"""
-    return "Success"
+    if "sparql" in body:
+        fuseki.update_query(body["sparql"])
+        return "Success"
+    return "Failure"
