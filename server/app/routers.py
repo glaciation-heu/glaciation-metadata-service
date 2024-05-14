@@ -5,7 +5,6 @@ from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import TagEnum
-
 from app.FusekiCommunicator import FusekiCommunicatior
 
 router = APIRouter(tags=[TagEnum.GRAPH])
@@ -13,7 +12,10 @@ router = APIRouter(tags=[TagEnum.GRAPH])
 fuseki_jena_url = "localhost"
 fuseki_jena_port = 3030
 fuseki_jena_dataset_name = "slice"
-fuseki = FusekiCommunicatior(fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name)
+fuseki = FusekiCommunicatior(
+    fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+)
+
 
 @router.get(
     "/",
