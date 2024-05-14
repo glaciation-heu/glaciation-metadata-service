@@ -1,5 +1,7 @@
 from SPARQLWrapper import JSON, SPARQLWrapper2
-from typing import List, Dict, Any
+from SPARQLWrapper.SmartWrapper import Bindings
+from SPARQLWrapper.Wrapper import QueryResult
+# from typing import List, Dict, Any
 
 # The `FusekiCommunicator` class is a Python class that provides methods for communicating with a
 # Fuseki server using SPARQL queries.
@@ -28,7 +30,7 @@ class FusekiCommunicatior:
         self.sparql = SPARQLWrapper2("http://{}:{}/{}".format(self.fuseki_url, self.port, self.dataset_name))
         self.sparql.method = "POST"
 
-    def read_query(self, query: str) -> List[Dict[str, Any]] | Any | None:
+    def read_query(self, query: str) -> Bindings | None:
         """
         The function reads a SPARQL query, sets it as the query for a SPARQL object, and returns the
         result of the query as a list of dictionaries, a single value, or None if an exception occurs.
@@ -40,12 +42,12 @@ class FusekiCommunicatior:
         self.sparql.setQuery(query)
         self.sparql.setReturnFormat(JSON)
         try:
-            return self.sparql.query().bindings
+            return self.sparql.query()
         except Exception as e:
             print(e)
             return None
         
-    def update_query(self, query: str):
+    def update_query(self, query: str) -> QueryResult | None:
         self.sparql.setQuery(query)
         try:
             return self.sparql.query()
