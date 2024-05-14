@@ -30,7 +30,7 @@ class FusekiCommunicatior:
         self.sparql = SPARQLWrapper2("http://{}:{}/{}".format(self.fuseki_url, self.port, self.dataset_name))
         self.sparql.method = "POST"
 
-    def read_query(self, query: str) -> Bindings | None:
+    def read_query(self, query: str) -> Bindings | QueryResult | None:
         """
         The function reads a SPARQL query, sets it as the query for a SPARQL object, and returns the
         result of the query as a list of dictionaries, a single value, or None if an exception occurs.
@@ -47,7 +47,7 @@ class FusekiCommunicatior:
             print(e)
             return None
         
-    def update_query(self, query: str) -> QueryResult | None:
+    def update_query(self, query: str) -> Bindings | QueryResult | None:
         self.sparql.setQuery(query)
         try:
             return self.sparql.query()
