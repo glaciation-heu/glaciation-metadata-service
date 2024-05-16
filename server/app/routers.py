@@ -1,10 +1,11 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Dict, List
 
 from io import StringIO
 from json import dumps
 
 from fastapi import APIRouter, Body
 from rdflib import Graph
+from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
@@ -60,3 +61,31 @@ async def update_graph(
     fuseki.update_query(query)
 
     return "Success"
+
+
+@router.patch(
+    "/api/v0/graph/search",
+)
+async def search_graph(
+    body: Annotated[
+        str,
+        Body(
+            description=(
+                "Request body must be a SELECT SPARQL query. "
+                "It must be compatible with GLACIATION metadata upper ontology."
+            ),
+        ),
+    ]
+) -> List[Dict[str, Dict[str, str]]] | str:
+    result = fuseki.read_query(body)
+    if type(result) is Bindings:
+        bindings = []
+        for item in result.bindings:
+            new_item = {}
+            for key in item:
+                if hasattr(item[key], "value") and hasattr(item[key], "type"):
+                    new_item[key] = {"value": item[key].value, "type": item[key].type}
+            bindings.append(new_item)
+        return bindings
+    else:
+        return str(result)

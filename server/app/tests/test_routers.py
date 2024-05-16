@@ -28,3 +28,16 @@ def test__update_graph__redirected() -> None:
     )
     assert response.status_code == HTTP_200_OK
     assert response.json() == "Success"
+
+
+def test__search_graph__redirected() -> None:
+    response = client.patch(
+        "/api/v0/graph/search",
+        json="""
+        SELECT ?subject ?predicate ?object
+        WHERE {
+            ?subject ?predicate ?object
+        }
+        """,
+    )
+    assert response.status_code == HTTP_200_OK
