@@ -31,13 +31,15 @@ def test__update_graph__redirected() -> None:
 
 
 def test__search_graph__redirected() -> None:
-    response = client.patch(
+    response = client.get(
         "/api/v0/graph/search",
-        json="""
-        SELECT ?subject ?predicate ?object
-        WHERE {
-            ?subject ?predicate ?object
-        }
-        """,
+        params={
+            "SPARQLquery": """
+            SELECT ?subject ?predicate ?object
+            WHERE {
+                ?subject ?predicate ?object
+            }
+            """
+        },
     )
     assert response.status_code == HTTP_200_OK

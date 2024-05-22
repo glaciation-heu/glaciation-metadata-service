@@ -3,7 +3,7 @@ from typing import Annotated, Any, Dict, List
 from io import StringIO
 from json import dumps
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Query
 from rdflib import Graph
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
@@ -63,13 +63,13 @@ async def update_graph(
     return "Success"
 
 
-@router.patch(
+@router.get(
     "/api/v0/graph/search",
 )
 async def search_graph(
-    body: Annotated[
+    SPARQLquery: Annotated[
         str,
-        Body(
+        Query(
             description=(
                 "Request body must be a SELECT SPARQL query. "
                 "It must be compatible with GLACIATION metadata upper ontology."
@@ -77,7 +77,7 @@ async def search_graph(
         ),
     ]
 ) -> List[Dict[str, Dict[str, str]]] | str:
-    result = fuseki.read_query(body)
+    result = fuseki.read_query(SPARQLquery)
     if type(result) is Bindings:
         bindings = []
         for item in result.bindings:
