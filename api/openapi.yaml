@@ -42,24 +42,34 @@ paths:
       tags:
       - Graph
       summary: Search Graph
-      description: Search Distributed Knowledge Graph
-      operationId: search_graph_api_v0_graph_patch
+      operationId: search_graph_api_v0_graph_search_get
       parameters:
-        - in: query
-          name: SPARQLquery
-          required: true
-          schema:
-            type: string
+      - name: SPARQLquery
+        in: query
+        required: true
+        schema:
+          type: string
           description: Request body must be a SELECT SPARQL query. It must be compatible
             with GLACIATION metadata upper ontology.
+          title: Sparqlquery
+        description: Request body must be a SELECT SPARQL query. It must be compatible
+          with GLACIATION metadata upper ontology.
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                type: object
-                title: Response Search Graph Api V0 Graph Patch
+                anyOf:
+                - type: array
+                  items:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      additionalProperties:
+                        type: string
+                - type: string
+                title: Response Search Graph Api V0 Graph Search Get
         '422':
           description: Validation Error
           content:

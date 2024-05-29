@@ -1,5 +1,6 @@
 from typing import Annotated, Any, Dict, List
 
+import logging
 from io import StringIO
 from json import dumps
 
@@ -11,6 +12,8 @@ from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
+
+logger = logging.getLogger()
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
@@ -29,6 +32,7 @@ fuseki = FusekiCommunicatior(
 )
 async def read_root() -> RedirectResponse:
     """Redirect to Swagger"""
+    logger.warning("New text record AlexDemoText")
     return RedirectResponse(url="/docs", status_code=HTTP_303_SEE_OTHER)
 
 
