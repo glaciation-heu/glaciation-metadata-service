@@ -37,39 +37,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v0/graph/search:
     get:
       tags:
       - Graph
       summary: Search Graph
-      operationId: search_graph_api_v0_graph_search_get
+      description: Execute SPARQL search query and return a response in JSON-LD format.
+      operationId: search_graph_api_v0_graph_get
       parameters:
-      - name: SPARQLquery
+      - name: query
         in: query
         required: true
         schema:
           type: string
-          description: Request body must be a SELECT SPARQL query. It must be compatible
-            with GLACIATION metadata upper ontology.
-          title: Sparqlquery
-        description: Request body must be a SELECT SPARQL query. It must be compatible
-          with GLACIATION metadata upper ontology.
+          description: SELECT query in SPARQL language. It must be compatible with
+            GLACIATION metadata upper ontology.
+          title: Query
+        description: SELECT query in SPARQL language. It must be compatible with GLACIATION
+          metadata upper ontology.
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                anyOf:
-                - type: array
-                  items:
-                    type: object
-                    additionalProperties:
-                      type: object
-                      additionalProperties:
-                        type: string
-                - type: string
-                title: Response Search Graph Api V0 Graph Search Get
+                $ref: '#/components/schemas/SearchResponse'
         '422':
           description: Validation Error
           content:
@@ -100,6 +91,65 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    ResponseResults:
+      properties:
+        bindings:
+          items: {}
+          type: array
+          title: Bindings
+      type: object
+      required:
+      - bindings
+      title: ResponseResults
+    ResposneHead:
+      properties:
+        vars:
+          items:
+            type: string
+          type: array
+          title: Vars
+      type: object
+      required:
+      - vars
+      title: ResposneHead
+    SearchResponse:
+      properties:
+        head:
+          $ref: '#/components/schemas/ResposneHead'
+        results:
+          $ref: '#/components/schemas/ResponseResults'
+      type: object
+      required:
+      - head
+      - results
+      title: SearchResponse
+      example:
+        head:
+          vars:
+          - sub
+          - pred
+          - obj
+        results:
+          bindings:
+          - obj:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/schema/Cheese
+            pred:
+              type: uri
+              value: http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+            sub:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/halloumi
+          - obj:
+              type: literal
+              value: Halloumi
+              xml:lang: el
+            pred:
+              type: uri
+              value: http://www.w3.org/2000/01/rdf-schema#label
+            sub:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/halloumi
     ValidationError:
       properties:
         loc:
