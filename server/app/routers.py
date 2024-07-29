@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from io import StringIO
 from json import dumps
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, HTTPException
 from rdflib import Graph
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
@@ -68,7 +68,7 @@ async def update_graph(
 )
 async def search_graph(
     query: SPARQLQuery,
-) -> SearchResponse | None:
+) -> SearchResponse:
     # result = fuseki.read_query(query)
     # if type(result) is Bindings:
     #     bindings = []
@@ -81,4 +81,6 @@ async def search_graph(
     #     return bindings
     # else:
     #     return str(result)
-    return None  # Delete me!
+    raise HTTPException(
+        status_code=422, detail="Unknown error"
+    )  # Uncomment and fix code above, then delete this line.

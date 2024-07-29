@@ -59,10 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                - $ref: '#/components/schemas/SearchResponse'
-                - type: 'null'
-                title: Response Search Graph Api V0 Graph Get
+                $ref: '#/components/schemas/SearchResponse'
         '422':
           description: Validation Error
           content:
@@ -125,6 +122,33 @@ components:
       - head
       - results
       title: SearchResponse
+      example:
+        head:
+          vars:
+          - sub
+          - pred
+          - obj
+        results:
+          bindings:
+          - obj:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/schema/Cheese
+            pred:
+              type: uri
+              value: http://www.w3.org/1999/02/22-rdf-syntax-ns#type
+            sub:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/halloumi
+          - obj:
+              type: literal
+              value: Halloumi
+              xml:lang: el
+            pred:
+              type: uri
+              value: http://www.w3.org/2000/01/rdf-schema#label
+            sub:
+              type: uri
+              value: http://data.kasabi.com/dataset/cheese/halloumi
     ValidationError:
       properties:
         loc:
