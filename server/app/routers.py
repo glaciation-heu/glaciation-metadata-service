@@ -1,16 +1,16 @@
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any
 
 from io import StringIO
 from json import dumps
 
 from fastapi import APIRouter, Body, Query
 from rdflib import Graph
-from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
+from app.schemas import SearchResponse
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
@@ -76,16 +76,17 @@ async def search_graph(
             ),
         ),
     ]
-) -> List[Dict[str, Dict[str, str]]] | str:
-    result = fuseki.read_query(SPARQLquery)
-    if type(result) is Bindings:
-        bindings = []
-        for item in result.bindings:
-            new_item = {}
-            for key in item:
-                if hasattr(item[key], "value") and hasattr(item[key], "type"):
-                    new_item[key] = {"value": item[key].value, "type": item[key].type}
-            bindings.append(new_item)
-        return bindings
-    else:
-        return str(result)
+) -> SearchResponse | None:
+    # result = fuseki.read_query(SPARQLquery)
+    # if type(result) is Bindings:
+    #     bindings = []
+    #     for item in result.bindings:
+    #         new_item = {}
+    #         for key in item:
+    #             if hasattr(item[key], "value") and hasattr(item[key], "type"):
+    #                 new_item[key] = {"value": item[key].value, "type": item[key].type}
+    #         bindings.append(new_item)
+    #     return bindings
+    # else:
+    #     return str(result)
+    return None  # Delete me!

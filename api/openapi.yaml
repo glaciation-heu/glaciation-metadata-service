@@ -60,14 +60,8 @@ paths:
             application/json:
               schema:
                 anyOf:
-                - type: array
-                  items:
-                    type: object
-                    additionalProperties:
-                      type: object
-                      additionalProperties:
-                        type: string
-                - type: string
+                - $ref: '#/components/schemas/SearchResponse'
+                - type: 'null'
                 title: Response Search Graph Api V0 Graph Get
         '422':
           description: Validation Error
@@ -99,6 +93,38 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    ResponseResults:
+      properties:
+        bindings:
+          items: {}
+          type: array
+          title: Bindings
+      type: object
+      required:
+      - bindings
+      title: ResponseResults
+    ResposneHead:
+      properties:
+        vars:
+          items:
+            type: string
+          type: array
+          title: Vars
+      type: object
+      required:
+      - vars
+      title: ResposneHead
+    SearchResponse:
+      properties:
+        head:
+          $ref: '#/components/schemas/ResposneHead'
+        results:
+          $ref: '#/components/schemas/ResponseResults'
+      type: object
+      required:
+      - head
+      - results
+      title: SearchResponse
     ValidationError:
       properties:
         loc:
