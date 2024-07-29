@@ -64,7 +64,7 @@ async def update_graph(
 
 
 @router.get(
-    "/api/v0/graph/search",
+    "/api/v0/graph",
 )
 async def search_graph(
     SPARQLquery: Annotated[

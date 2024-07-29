@@ -32,7 +32,7 @@ def test__update_graph__redirected() -> None:
 
 def test__search_graph__redirected() -> None:
     response = client.get(
-        "/api/v0/graph/search",
+        "/api/v0/graph",
         params={
             "SPARQLquery": """
             SELECT ?subject ?predicate ?object

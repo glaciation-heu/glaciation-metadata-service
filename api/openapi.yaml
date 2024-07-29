@@ -37,12 +37,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v0/graph/search:
     get:
       tags:
       - Graph
       summary: Search Graph
-      operationId: search_graph_api_v0_graph_search_get
+      operationId: search_graph_api_v0_graph_get
       parameters:
       - name: SPARQLquery
         in: query
@@ -69,7 +68,7 @@ paths:
                       additionalProperties:
                         type: string
                 - type: string
-                title: Response Search Graph Api V0 Graph Search Get
+                title: Response Search Graph Api V0 Graph Get
         '422':
           description: Validation Error
           content:
