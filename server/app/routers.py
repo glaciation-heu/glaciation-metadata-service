@@ -1,17 +1,14 @@
-from typing import Annotated, Any
-
 from io import StringIO
 from json import dumps
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
 from rdflib import Graph
-from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import EMPTY_SEARCH_RESPONSE, TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
-from app.schemas import SearchResponse, SPARQLQuery
+from app.schemas import SearchResponse, SPARQLQuery, UpdateRequestBody
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
@@ -37,15 +34,7 @@ async def read_root() -> RedirectResponse:
     "/api/v0/graph",
 )
 async def update_graph(
-    body: Annotated[
-        dict[str, Any],
-        Body(
-            description=(
-                "Request body must be in JSON-LD format. "
-                "It must be compatible with GLACIATION metadata upper ontology."
-            ),
-        ),
-    ]
+    body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
     g = Graph()
@@ -70,18 +59,17 @@ async def update_graph(
 async def search_graph(
     query: SPARQLQuery,
 ) -> SearchResponse:
-    result = fuseki.read_query(query)
-    if type(result) is Bindings:
-        # bindings = []
-        # for item in result.bindings:
-        #     new_item = {}
-        #     for key in item:
-        #         if hasattr(item[key], "value") and hasattr(item[key], "type"):
-        #             new_item[key] = {"value": item[key].value, "type": item[key].type}
-        #     bindings.append(new_item)
-        # return bindings
-        return (
-            EMPTY_SEARCH_RESPONSE  # Uncomment and fix code above, then delete this line
-        )
-    else:
-        return EMPTY_SEARCH_RESPONSE
+    """Execute SPARQL search query and return a response in JSON-LD format."""
+    # result = fuseki.read_query(query)
+    # if type(result) is Bindings:
+    #     bindings = []
+    #     for item in result.bindings:
+    #         new_item = {}
+    #         for key in item:
+    #             if hasattr(item[key], "value") and hasattr(item[key], "type"):
+    #                 new_item[key] = {"value": item[key].value, "type": item[key].type}
+    #         bindings.append(new_item)
+    #     return bindings
+    # else:
+    #     return str(result)
+    return EMPTY_SEARCH_RESPONSE  # Fix code above, then delete this line

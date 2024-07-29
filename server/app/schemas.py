@@ -1,6 +1,6 @@
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import Query
+from fastapi import Body, Query
 from pydantic import BaseModel
 
 
@@ -57,11 +57,21 @@ class SearchResponse(BaseModel):
         }
 
 
+UpdateRequestBody = Annotated[
+    dict[str, Any],
+    Body(
+        description=(
+            "Request body must be in JSON-LD format. "
+            "It must be compatible with GLACIATION metadata upper ontology."
+        ),
+    ),
+]
+
 SPARQLQuery = Annotated[
     str,
     Query(
         description=(
-            "Request body must be a SELECT SPARQL query. "
+            "SELECT query in SPARQL language. "
             "It must be compatible with GLACIATION metadata upper ontology."
         ),
     ),

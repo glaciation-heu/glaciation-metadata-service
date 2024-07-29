@@ -41,6 +41,7 @@ paths:
       tags:
       - Graph
       summary: Search Graph
+      description: Execute SPARQL search query and return a response in JSON-LD format.
       operationId: search_graph_api_v0_graph_get
       parameters:
       - name: query
@@ -48,11 +49,11 @@ paths:
         required: true
         schema:
           type: string
-          description: Request body must be a SELECT SPARQL query. It must be compatible
-            with GLACIATION metadata upper ontology.
+          description: SELECT query in SPARQL language. It must be compatible with
+            GLACIATION metadata upper ontology.
           title: Query
-        description: Request body must be a SELECT SPARQL query. It must be compatible
-          with GLACIATION metadata upper ontology.
+        description: SELECT query in SPARQL language. It must be compatible with GLACIATION
+          metadata upper ontology.
       responses:
         '200':
           description: Successful Response
