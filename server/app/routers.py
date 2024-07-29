@@ -3,14 +3,14 @@ from typing import Annotated, Any
 from io import StringIO
 from json import dumps
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body
 from rdflib import Graph
 from starlette.responses import RedirectResponse
 from starlette.status import HTTP_303_SEE_OTHER
 
 from app.consts import TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
-from app.schemas import SearchResponse
+from app.schemas import SearchResponse, SPARQLQuery
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
@@ -67,17 +67,9 @@ async def update_graph(
     "/api/v0/graph",
 )
 async def search_graph(
-    SPARQLquery: Annotated[
-        str,
-        Query(
-            description=(
-                "Request body must be a SELECT SPARQL query. "
-                "It must be compatible with GLACIATION metadata upper ontology."
-            ),
-        ),
-    ]
+    query: SPARQLQuery,
 ) -> SearchResponse | None:
-    # result = fuseki.read_query(SPARQLquery)
+    # result = fuseki.read_query(query)
     # if type(result) is Bindings:
     #     bindings = []
     #     for item in result.bindings:

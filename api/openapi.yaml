@@ -43,14 +43,14 @@ paths:
       summary: Search Graph
       operationId: search_graph_api_v0_graph_get
       parameters:
-      - name: SPARQLquery
+      - name: query
         in: query
         required: true
         schema:
           type: string
           description: Request body must be a SELECT SPARQL query. It must be compatible
             with GLACIATION metadata upper ontology.
-          title: Sparqlquery
+          title: Query
         description: Request body must be a SELECT SPARQL query. It must be compatible
           with GLACIATION metadata upper ontology.
       responses:
