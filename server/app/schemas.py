@@ -1,19 +1,19 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Dict
 
 from fastapi import Body, Query
 from pydantic import BaseModel
 
 
-class ResposneHead(BaseModel):
+class ResponseHead(BaseModel):
     vars: list[str]
 
 
 class ResponseResults(BaseModel):
-    bindings: list[object]
+    bindings: list[Dict[str, Any]]
 
 
 class SearchResponse(BaseModel):
-    head: ResposneHead
+    head: ResponseHead
     results: ResponseResults
 
     class Config:

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from app.schemas import ResponseResults, ResposneHead, SearchResponse
+from app.schemas import ResponseHead, ResponseResults, SearchResponse
 
 
 class TagEnum(Enum):
@@ -9,6 +9,6 @@ class TagEnum(Enum):
 
 
 EMPTY_SEARCH_RESPONSE = SearchResponse(
-    head=ResposneHead(vars=[]),
+    head=ResponseHead(vars=[]),
     results=ResponseResults(bindings=[]),
 )
