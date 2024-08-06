@@ -23,7 +23,7 @@ router = APIRouter(tags=[TagEnum.GRAPH])
 
 fuseki_jena_url = "jena-fuseki.integration"
 fuseki_jena_port = None
-fuseki_jena_dataset_name = "cheese"
+fuseki_jena_dataset_name = "slice"
 fuseki = FusekiCommunicatior(
     fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
 )
