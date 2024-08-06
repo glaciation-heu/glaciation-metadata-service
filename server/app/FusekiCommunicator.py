@@ -9,7 +9,9 @@ from SPARQLWrapper.Wrapper import QueryResult
 
 
 class FusekiCommunicatior:
-    def __init__(self, fuseki_url: str, port: int | str, dataset_name: str) -> None:
+    def __init__(
+        self, fuseki_url: str, port: int | str | None, dataset_name: str
+    ) -> None:
         """
         The function initializes a SPARQLWrapper2 object with the provided Fuseki URL,
         port, and dataset name.
@@ -31,8 +33,11 @@ class FusekiCommunicatior:
         self.port = port
         self.dataset_name = dataset_name
 
+        port_placeholder = f":{self.port}" if self.port is not None else ""
         self.sparql = SPARQLWrapper2(
-            "http://{}:{}/{}".format(self.fuseki_url, self.port, self.dataset_name)
+            "http://{}{}/{}".format(
+                self.fuseki_url, port_placeholder, self.dataset_name
+            )
         )
         self.sparql.method = "POST"
 
