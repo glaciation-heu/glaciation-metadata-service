@@ -41,7 +41,7 @@ paths:
       tags:
       - Graph
       summary: Search Graph
-      description: Execute SPARQL search query and return a response in JSON-LD format.
+      description: Execute SPARQL search query and return a response in JSON format.
       operationId: search_graph_api_v0_graph_get
       parameters:
       - name: query
@@ -91,17 +91,7 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    ResponseResults:
-      properties:
-        bindings:
-          items: {}
-          type: array
-          title: Bindings
-      type: object
-      required:
-      - bindings
-      title: ResponseResults
-    ResposneHead:
+    ResponseHead:
       properties:
         vars:
           items:
@@ -111,11 +101,22 @@ components:
       type: object
       required:
       - vars
-      title: ResposneHead
+      title: ResponseHead
+    ResponseResults:
+      properties:
+        bindings:
+          items:
+            type: object
+          type: array
+          title: Bindings
+      type: object
+      required:
+      - bindings
+      title: ResponseResults
     SearchResponse:
       properties:
         head:
-          $ref: '#/components/schemas/ResposneHead'
+          $ref: '#/components/schemas/ResponseHead'
         results:
           $ref: '#/components/schemas/ResponseResults'
       type: object
