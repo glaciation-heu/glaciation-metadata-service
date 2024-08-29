@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from io import StringIO
 from json import dumps
+from time import time
 
 from fastapi import APIRouter
 from rdflib import Graph
@@ -49,12 +50,16 @@ async def update_graph(
     g = Graph()
     g.parse(StringIO(dumps(body)), format="json-ld")
 
+    ts = int(time() * 1000)  # current timestamp
+
     query = "INSERT DATA {\n"
+    query += "\tGRAPH <timestamp:%d> {\n" % ts
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
-            query += "\t" + s.n3() + " " + p.n3() + " " + o.n3() + " .\n"
+            query += "\t\t" + s.n3() + " " + p.n3() + " " + o.n3() + " .\n"
         else:
             return "Failure"
+    query += "\t}\n"
     query += "}"
 
     fuseki.update_query(query)
