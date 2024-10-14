@@ -1,3 +1,6 @@
+from typing import Tuple
+
+from rdflib.plugins.sparql.parser import parseQuery
 from SPARQLWrapper import JSON, SPARQLWrapper2
 from SPARQLWrapper.SmartWrapper import Bindings
 from SPARQLWrapper.Wrapper import QueryResult
@@ -41,6 +44,13 @@ class FusekiCommunicatior:
         )
         self.sparql.method = "POST"
 
+    def validate_sparql(self, query: str) -> Tuple[bool, str]:
+        try:
+            parseQuery(query)
+            return True, "The SPARQL query is syntactically correct."
+        except Exception as e:
+            return False, f"Syntax error in query: {e}"
+
     def read_query(self, query: str) -> Bindings | QueryResult | None:
         """
         The function reads a SPARQL query, sets it as the query for a SPARQL object, and
@@ -57,7 +67,6 @@ class FusekiCommunicatior:
             return self.sparql.query()
         except Exception as e:
             print(e)
-            print(f"The query:\n{query}\n")
             return None
 
     def update_query(self, query: str) -> Bindings | QueryResult | None:
@@ -66,5 +75,4 @@ class FusekiCommunicatior:
             return self.sparql.query()
         except Exception as e:
             print(e)
-            print(f"The query:\n{query}\n")
             return None

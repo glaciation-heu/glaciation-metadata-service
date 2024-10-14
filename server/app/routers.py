@@ -62,9 +62,15 @@ async def update_graph(
     query += "\t}\n"
     query += "}"
 
-    fuseki.update_query(query)
+    valid, msg = fuseki.validate_sparql(query)
 
-    return "Success"
+    if valid:
+        fuseki.update_query(query)
+        return "Success"
+    else:
+        print(msg)
+        print(f"The query:\n{query}")
+        return "Failure"
 
 
 @router.get(
