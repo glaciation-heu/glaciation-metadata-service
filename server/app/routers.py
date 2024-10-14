@@ -56,7 +56,7 @@ async def update_graph(
     query += "\tGRAPH <timestamp:%d> {\n" % ts
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
-            query += "\t\t" + s.n3() + " " + p.n3() + " " + o.n3() + " .\n"
+            query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
         else:
             return "Failure"
     query += "\t}\n"

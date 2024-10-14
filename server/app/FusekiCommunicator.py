@@ -57,6 +57,7 @@ class FusekiCommunicatior:
             return self.sparql.query()
         except Exception as e:
             print(e)
+            print(f"The query:\n{query}\n")
             return None
 
     def update_query(self, query: str) -> Bindings | QueryResult | None:
@@ -65,4 +66,5 @@ class FusekiCommunicatior:
             return self.sparql.query()
         except Exception as e:
             print(e)
+            print(f"The query:\n{query}\n")
             return None
