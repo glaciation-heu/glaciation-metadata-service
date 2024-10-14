@@ -80,27 +80,33 @@ async def search_graph(
     query: SPARQLQuery,
 ) -> SearchResponse:
     """Execute SPARQL search query and return a response in JSON format."""
-    result = fuseki.read_query(query)
+    valid, msg = fuseki.validate_sparql(query, "query")
 
-    if type(result) is Bindings:
-        bindings = []
-        for item in result.bindings:
-            new_item: Dict[str, Any] = {}
-            for key in item:
-                new_item[key] = {}
-                for property in item[key].__dict__:
-                    if (
-                        property != "variable"
-                        and item[key].__dict__[property] is not None
-                    ):
-                        new_item[key][property] = item[key].__dict__[property]
-                        if property == "lang":
-                            new_item[key]["xml:lang"] = new_item[key].pop("lang")
-            bindings.append(new_item)
+    if valid:
+        result = fuseki.read_query(query)
 
-        return SearchResponse(
-            head=ResponseHead(vars=result.head["vars"]),
-            results=ResponseResults(bindings=bindings),
-        )
+        if type(result) is Bindings:
+            bindings = []
+            for item in result.bindings:
+                new_item: Dict[str, Any] = {}
+                for key in item:
+                    new_item[key] = {}
+                    for property in item[key].__dict__:
+                        if (
+                            property != "variable"
+                            and item[key].__dict__[property] is not None
+                        ):
+                            new_item[key][property] = item[key].__dict__[property]
+                            if property == "lang":
+                                new_item[key]["xml:lang"] = new_item[key].pop("lang")
+                bindings.append(new_item)
+
+            return SearchResponse(
+                head=ResponseHead(vars=result.head["vars"]),
+                results=ResponseResults(bindings=bindings),
+            )
+    else:
+        print(msg)
+        print(f"The query:\n{query}")
 
     return EMPTY_SEARCH_RESPONSE
