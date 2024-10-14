@@ -62,7 +62,7 @@ async def update_graph(
     query += "\t}\n"
     query += "}"
 
-    valid, msg = fuseki.validate_sparql(query)
+    valid, msg = fuseki.validate_sparql(query, "update")
 
     if valid:
         fuseki.update_query(query)
