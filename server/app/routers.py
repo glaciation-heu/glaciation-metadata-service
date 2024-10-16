@@ -47,7 +47,7 @@ async def update_graph(
     body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
-    TRIPLES_LIMIT = 1000
+    TRIPLES_LIMIT = 100
     g = Graph()
     g.parse(StringIO(dumps(body)), format="json-ld")
 
