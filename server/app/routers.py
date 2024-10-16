@@ -47,6 +47,7 @@ async def update_graph(
     body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
+    TRIPLES_LIMIT = 1000
     g = Graph()
     g.parse(StringIO(dumps(body)), format="json-ld")
 
@@ -54,23 +55,32 @@ async def update_graph(
 
     query = "INSERT DATA {\n"
     query += "\tGRAPH <timestamp:%d> {\n" % ts
+    i = 0
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
             query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
+            i += 1
         else:
             return "Failure"
-    query += "\t}\n"
-    query += "}"
 
-    valid, msg = fuseki.validate_sparql(query, "update")
+        if i == TRIPLES_LIMIT:
+            query += "\t}\n"
+            query += "}"
 
-    if valid:
-        fuseki.update_query(query)
-        return "Success"
-    else:
-        print(msg)
-        print(f"The query:\n{query}")
-        return "Failure"
+            valid, msg = fuseki.validate_sparql(query, "update")
+
+            if valid:
+                fuseki.update_query(query)
+            else:
+                print(msg)
+                print(f"The query:\n{query}")
+                return "Failure"
+
+            query = "INSERT DATA {\n"
+            query += "\tGRAPH <timestamp:%d> {\n" % ts
+            i = 0
+
+    return "Success"
 
 
 @router.get(
