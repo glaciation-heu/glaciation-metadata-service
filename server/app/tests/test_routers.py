@@ -22,12 +22,14 @@ def test__read_root__redirected() -> None:
 def test__update_graph__redirected() -> None:
     with open("app/tests/stub_message.jsonld", "r") as f:
         json_input = load(f)
+    print(json_input)
     response = client.patch(
         "/api/v0/graph",
         json=json_input,
     )
+    print(response)
     assert response.status_code == HTTP_200_OK
-    assert response.json() in ("Success", "Failure")
+    assert response.json() == "Success"
 
 
 def test__search_graph__redirected() -> None:
