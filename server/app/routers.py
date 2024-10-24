@@ -4,11 +4,15 @@ from io import StringIO
 from json import dumps
 from time import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from rdflib import Graph
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_303_SEE_OTHER
+from starlette.status import (
+    HTTP_303_SEE_OTHER,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 from app.consts import EMPTY_SEARCH_RESPONSE, TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
@@ -58,7 +62,9 @@ async def update_graph(
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
             query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
         else:
-            return "Failure"
+            raise HTTPException(
+                HTTP_500_INTERNAL_SERVER_ERROR, "Error in parsing JSON-LD."
+            )
     query += "\t}\n"
     query += "}"
 
@@ -69,7 +75,7 @@ async def update_graph(
     else:
         print(msg)
         print(f"The query:\n{query}")
-        return "Failure"
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
 
     return "Success"
 
@@ -109,5 +115,6 @@ async def search_graph(
     else:
         print(msg)
         print(f"The query:\n{query}")
+        raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
     return EMPTY_SEARCH_RESPONSE
