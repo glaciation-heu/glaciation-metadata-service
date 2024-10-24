@@ -12,6 +12,16 @@ entries:
     - https://glaciation-heu.github.io/glaciation-metadata-service/helm-charts/metadata-service-0.4.2.tgz
     version: 0.4.2
   - apiVersion: v2
+    appVersion: 0.4.2-dev.1.feature-proper-H.ac74ebb7
+    created: "2024-10-24T10:14:37.994459625Z"
+    description: GLACIATION Metadata service
+    digest: fba674e9d321229104e672f3266aa9f485f317db3a55f41f0a3799dbf71ceb7c
+    name: metadata-service
+    type: application
+    urls:
+    - https://glaciation-heu.github.io/glaciation-metadata-service/helm-charts/metadata-service-0.4.2-dev.1.feature-proper-H.ac74ebb7.tgz
+    version: 0.4.2-dev.1.feature-proper-H.ac74ebb7
+  - apiVersion: v2
     appVersion: 0.4.1-dev.0.proper-HTTP-resp.abcf29b1
     created: "2024-10-24T10:00:50.161953156Z"
     description: GLACIATION Metadata service
@@ -461,4 +471,4 @@ entries:
     urls:
     - https://glaciation-heu.github.io/glaciation-metadata-service/helm-charts/metadata-service-0.1.12.tgz
     version: 0.1.12
-generated: "2024-10-24T10:09:05.780935245Z"
+generated: "2024-10-24T10:14:37.994030674Z"
