@@ -4,11 +4,16 @@ from io import StringIO
 from json import dumps
 from time import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from loguru import logger
 from rdflib import Graph
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
-from starlette.status import HTTP_303_SEE_OTHER
+from starlette.status import (
+    HTTP_303_SEE_OTHER,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 from app.consts import EMPTY_SEARCH_RESPONSE, TagEnum
 from app.FusekiCommunicator import FusekiCommunicatior
@@ -51,25 +56,35 @@ async def update_graph(
     g.parse(StringIO(dumps(body)), format="json-ld")
 
     ts = int(time() * 1000)  # current timestamp
+    n_triples = 0
 
     query = "INSERT DATA {\n"
     query += "\tGRAPH <timestamp:%d> {\n" % ts
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
             query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
+            n_triples += 1
         else:
-            return "Failure"
+            raise HTTPException(
+                HTTP_500_INTERNAL_SERVER_ERROR, "Error in parsing JSON-LD."
+            )
     query += "\t}\n"
     query += "}"
 
     valid, msg = fuseki.validate_sparql(query, "update")
 
-    if valid:
+    if n_triples == 0:
+        logger.error("No triples could be extracted from JSON-LD.")
+        raise HTTPException(
+            HTTP_400_BAD_REQUEST, "No triples could be extracted from JSON-LD."
+        )
+    elif valid:
         fuseki.update_query(query)
+        logger.debug(f"Inserted {n_triples} triple(s) into graph <timastamp:{ts}>.")
     else:
-        print(msg)
-        print(f"The query:\n{query}")
-        return "Failure"
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
 
     return "Success"
 
@@ -107,7 +122,8 @@ async def search_graph(
                 results=ResponseResults(bindings=bindings),
             )
     else:
-        print(msg)
-        print(f"The query:\n{query}")
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
     return EMPTY_SEARCH_RESPONSE
