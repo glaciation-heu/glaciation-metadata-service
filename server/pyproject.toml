@@ -21,6 +21,7 @@ classy-fastapi = "^0.6.1"
 prometheus-fastapi-instrumentator = "^6.1.0"
 pre-commit = "^3.7.0"
 sparqlwrapper = "^2.0.0"
+loguru = "^0.7.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12"
