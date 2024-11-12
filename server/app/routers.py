@@ -27,7 +27,7 @@ from app.schemas import (
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
-fuseki_jena_url = "jena-fuseki"
+fuseki_jena_url = "jena-fuseki-test"
 fuseki_jena_port = 3030
 fuseki_jena_dataset_name = "slice"
 fuseki = FusekiCommunicatior(
