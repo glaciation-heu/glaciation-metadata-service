@@ -61,8 +61,8 @@ async def update_graph(
     graph_name = ""
     if "@id" in body:
         graph_name = body["@id"]
-        if graph_name[-1] != '/':
-            graph_name += '/'
+        if graph_name[-1] != "/":
+            graph_name += "/"
 
     query = "INSERT DATA {\n"
     query += "\tGRAPH <%stimestamp:%d> {\n" % (graph_name, ts)
@@ -86,7 +86,9 @@ async def update_graph(
         )
     elif valid:
         fuseki.update_query(query)
-        logger.debug(f"Inserted {n_triples} triple(s) into graph <{graph_name}timestamp:{ts}>.")
+        logger.debug(
+            f"Inserted {n_triples} triple(s) into graph <{graph_name}timestamp:{ts}>."
+        )
     else:
         logger.error(msg)
         logger.debug(f"The query:\n{query}")
