@@ -6,7 +6,7 @@ from time import time
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
-from rdflib import Graph
+from rdflib import ConjunctiveGraph
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
@@ -27,7 +27,7 @@ from app.schemas import (
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
-fuseki_jena_url = "jena-fuseki-test"
+fuseki_jena_url = "jena-fuseki"
 fuseki_jena_port = 3030
 fuseki_jena_dataset_name = "slice"
 fuseki = FusekiCommunicatior(
@@ -52,14 +52,20 @@ async def update_graph(
     body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
-    g = Graph()
+    g = ConjunctiveGraph()
     g.parse(StringIO(dumps(body)), format="json-ld")
 
     ts = int(time() * 1000)  # current timestamp
     n_triples = 0
 
+    graph_name = ""
+    if "@id" in body:
+        graph_name = body["@id"]
+        if graph_name[-1] != '/':
+            graph_name += '/'
+
     query = "INSERT DATA {\n"
-    query += "\tGRAPH <timestamp:%d> {\n" % ts
+    query += "\tGRAPH <%stimestamp:%d> {\n" % (graph_name, ts)
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
             query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
@@ -80,7 +86,7 @@ async def update_graph(
         )
     elif valid:
         fuseki.update_query(query)
-        logger.debug(f"Inserted {n_triples} triple(s) into graph <timastamp:{ts}>.")
+        logger.debug(f"Inserted {n_triples} triple(s) into graph <{graph_name}timestamp:{ts}>.")
     else:
         logger.error(msg)
         logger.debug(f"The query:\n{query}")
