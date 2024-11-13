@@ -45,6 +45,43 @@ async def read_root() -> RedirectResponse:
     return RedirectResponse(url="/docs", status_code=HTTP_303_SEE_OTHER)
 
 
+timestamps_query = """PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?graphURI WHERE {
+  GRAPH ?graphURI {}
+  FILTER regex(str(?graphURI), "^timestamp:")
+}
+ORDER BY ASC(xsd:integer(replace(str(?graphURI), "^timestamp:", "")))
+"""
+
+
+def perform_query(query: SPARQLQuery, fuseki: FusekiCommunicatior) -> SearchResponse:
+    valid, msg = fuseki.validate_sparql(query, "query")
+    if valid:
+        result = fuseki.read_query(query)
+        if type(result) is Bindings:
+            bindings = []
+            for item in result.bindings:
+                new_item: Dict[str, Any] = {}
+                for key in item:
+                    new_item[key] = {}
+                    for property in item[key].__dict__:
+                        if (
+                            property != "variable"
+                            and item[key].__dict__[property] is not None
+                        ):
+                            new_item[key][property] = item[key].__dict__[property]
+                            if property == "lang":
+                                new_item[key]["xml:lang"] = new_item[key].pop("lang")
+                bindings.append(new_item)
+            return SearchResponse(
+                head=ResponseHead(vars=result.head["vars"]),
+                results=ResponseResults(bindings=bindings),
+            )
+    print(msg)
+    return EMPTY_SEARCH_RESPONSE
+
+
 @router.patch(
     "/api/v0/graph",
 )
@@ -52,6 +89,14 @@ async def update_graph(
     body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
+
+    timestamps = [
+        timestamp["graphURI"]["value"]
+        for timestamp in perform_query(timestamps_query, fuseki).results.bindings
+    ]
+
+    logger.debug(f"{len(timestamps)} timestamps retrieved.")
+
     g = ConjunctiveGraph()
     g.parse(StringIO(dumps(body)), format="json-ld")
 
