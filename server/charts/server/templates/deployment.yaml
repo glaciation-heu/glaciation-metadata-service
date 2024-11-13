@@ -44,10 +44,8 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      initContainers:
         - name: DropGraphsSidecar
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          restartPolicy: Always
+          image: python:3.12
           command: ["python", "app/drop_graphs.py"]
       {{- with .Values.nodeSelector }}
       nodeSelector:
