@@ -44,7 +44,7 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-        - name: DropGraphsSidecar
+        - name: drop-graphs-sidecar
           image: python:3.12
           command: ["python", "app/drop_graphs.py"]
       {{- with .Values.nodeSelector }}
