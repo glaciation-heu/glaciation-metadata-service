@@ -1,0 +1,6 @@
+SELECT (COUNT(*) AS ?triplesCount)
+WHERE {
+  GRAPH <graph> {
+    ?s ?p ?o.
+  }
+}

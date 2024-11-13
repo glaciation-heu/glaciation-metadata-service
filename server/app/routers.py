@@ -95,7 +95,7 @@ async def update_graph(
         for timestamp in perform_query(timestamps_query, fuseki).results.bindings
     ]
 
-    logger.debug(f"{len(timestamps)} timestamps retrieved.")
+    logger.debug(f"{len(timestamps)} timestamps retrieved now.")
 
     g = ConjunctiveGraph()
     g.parse(StringIO(dumps(body)), format="json-ld")

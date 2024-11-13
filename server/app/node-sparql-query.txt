@@ -1,0 +1,39 @@
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?graphURI ?node ?measurement ?measurementName ?timestamp ?value ?unit WHERE {
+  BIND({0} as ?intervalStart).
+  BIND({1} as ?intervalEnd).
+  {
+    SELECT ?graphURI ?timeslice WHERE {
+      GRAPH ?graphURI {}
+      FILTER(regex(str(?graphURI), "^timestamp:"))
+      BIND(xsd:integer(replace(str(?graphURI), "^timestamp:", "")) as ?timeslice).
+    }
+  }
+  FILTER(?timeslice >= ?intervalStart && ?timeslice < ?intervalEnd)
+  GRAPH ?graphURI {
+    SELECT ?node ?measurement ?measurementName ?timestamp ?value ?unit
+    WHERE {
+      ?node rdf:type <glc:WorkProducingResource> .
+      ?node <glc:hasDescription> "KubernetesWorkerNode".
+      {
+        ?node <glc:hasMeasurement> ?measurement.
+        ?measurement <glc:hasDescription> ?measurementName.
+        ?measurement <glc:hasTimestamp> ?timestamp.
+        ?measurement <glc:hasValue> ?value.
+        ?measurement <glc:measuredIn> ?unit.
+      }
+      UNION
+      {
+        ?node <glc:hasSubResource> ?subResource.
+        ?subResource <glc:hasMeasurement> ?measurement.
+        ?measurement <glc:hasDescription> ?measurementName.
+        ?measurement <glc:hasTimestamp> ?timestamp.
+        ?measurement <glc:hasValue> ?value.
+        ?measurement <glc:measuredIn> ?unit.
+      }
+    }
+    ORDER BY DESC(?timestamp)
+  }
+}

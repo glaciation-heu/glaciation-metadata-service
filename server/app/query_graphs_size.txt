@@ -1,0 +1,11 @@
+SELECT (COUNT(*) AS ?triplesCount)
+WHERE {
+  GRAPH <graph2> {
+    ?s ?p ?o.
+    FILTER NOT EXISTS {
+      GRAPH <graph1> {
+        ?s ?p ?o.
+      }
+    }
+  }
+}
