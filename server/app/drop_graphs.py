@@ -12,8 +12,6 @@ import schedule
 from loguru import logger
 from numpy import array
 
-from app.consts import EMPTY_SEARCH_RESPONSE
-
 
 def read_file(fname):
     with open(fname, "r") as f:
@@ -34,7 +32,7 @@ def local_query(query: str) -> Any:
         return response.json()
     except Exception as e:
         logger.error(e)
-        return EMPTY_SEARCH_RESPONSE.model_dump()
+        return {"head": {}, "results": {"bindings": []}}
 
 
 def job():
