@@ -4,5 +4,4 @@ SELECT ?graphURI WHERE {
   GRAPH ?graphURI {}
   FILTER regex(str(?graphURI), "^timestamp:")
 }
-ORDER BY ASC(xsd:integer(replace(str(?graphURI), "^timestamp:", "")))
-# LIMIT 100
+# ORDER BY ASC(xsd:integer(replace(str(?graphURI), "^timestamp:", "")))

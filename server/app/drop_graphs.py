@@ -1,16 +1,16 @@
 # the script should talk to metadata service directly
 # it should retrieve the time stamps
 
-from typing import Any
+from typing import Any, Dict
 
 import time
 from datetime import datetime, timedelta
+from re import search
 from urllib.parse import urlencode
 
 import requests
 import schedule
 from loguru import logger
-from numpy import array
 
 
 def read_file(fname):
@@ -35,26 +35,33 @@ def local_query(query: str) -> Any:
         return {"head": {}, "results": {"bindings": []}}
 
 
+def get_timestamps() -> Dict[str, int]:
+    graphURIs = [
+        timestamp["graphURI"]["value"]
+        for timestamp in local_query(read_file("app/query_files/query_timestamps.txt"))[
+            "results"
+        ]["bindings"]
+    ]
+    timestamps = {}
+    for graphURI in graphURIs:
+        found = search(r"timestamp:(\d+)", graphURI)
+        if found:
+            timestamps[graphURI] = int(found.group(1))
+
+    return timestamps
+
+
 def job():
-    timestamps = array(
-        [
-            timestamp["graphURI"]["value"]
-            for timestamp in local_query(
-                read_file("app/query_files/query_timestamps.txt")
-            )["results"]["bindings"]
-        ]
-    )
+    timestamps = get_timestamps()
 
     logger.debug(timestamps)
 
     cutoff_time = datetime.now() - timedelta(days=1)
     cutoff_timestamp = int(cutoff_time.timestamp()) * 1000
 
-    for i in range(len(timestamps)):
-        ts = int(timestamps[i].split(":")[-1])
-
-        if ts < cutoff_timestamp:
-            query = f"DROP GRAPH <{timestamps[i]}>"
+    for graphURI in timestamps:
+        if timestamps[graphURI] < cutoff_timestamp:
+            query = f"DROP GRAPH <{graphURI}>"
 
             params = {"query": query}
             encoded_query = urlencode(params)
@@ -68,7 +75,7 @@ def job():
             # # res=super_local_query("DROP GRAPH <" + timestamps[i]+'>')
             # logger.debug(response)
 
-            logger.info(f"Dropped graph <{timestamps[i]}>.")
+            logger.info(f"Dropped graph <{graphURI}>.")
 
 
 # schedule.every().day.at("23:59").do(job)
