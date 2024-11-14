@@ -45,7 +45,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: drop-graphs-sidecar
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
           command: ["python", "app/drop_graphs.py"]
       {{- with .Values.nodeSelector }}
       nodeSelector:
