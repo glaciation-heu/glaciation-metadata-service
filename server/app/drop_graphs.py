@@ -44,7 +44,6 @@ def get_timestamps() -> Dict[str, int]:
             "results"
         ]["bindings"]
     ]
-    logger.debug(local_query(read_file("app/query_files/query_timestamps.txt")))
     timestamps = {}
     for graphURI in graphURIs:
         found = search(r"timestamp:(\d+)", graphURI)
@@ -57,7 +56,7 @@ def get_timestamps() -> Dict[str, int]:
 def job():
     timestamps = get_timestamps()
 
-    logger.debug(timestamps)
+    logger.debug(f"Timestamps found:\n{timestamps}")
 
     cutoff_time = datetime.now() - timedelta(days=1)
     cutoff_timestamp = int(cutoff_time.timestamp()) * 1000
@@ -67,8 +66,8 @@ def job():
             query = f"DROP GRAPH <{graphURI}>;"
 
             local_query(query, True)
-            logger.info(f"Dropped graph <{query}>.")
-            sleep(2)
+            logger.info(f"Dropped graph <{graphURI}>.")
+            sleep(5)
 
 
 # schedule.every().day.at("23:59").do(job)
