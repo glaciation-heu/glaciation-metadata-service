@@ -46,3 +46,4 @@ tripleStoreAddress:
 
 keepGraphs:
   timeWindowMilliseconds: 86400000
+  intervalToCheckInSeconds: 3600

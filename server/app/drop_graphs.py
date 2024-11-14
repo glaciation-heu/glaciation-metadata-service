@@ -14,6 +14,9 @@ import schedule
 from loguru import logger
 
 TIME_WINDOW_MILLISECONDS = int(float(getenv("TIME_WINDOW_MILLISECONDS", "86400000")))
+INTERVAL_TO_CHECK_IN_SECONDS = int(
+    float(getenv("INTERVAL_TO_CHECK_IN_SECONDS", "86400"))
+)
 
 
 def read_file(fname):
@@ -73,8 +76,7 @@ def job():
             sleep(5)
 
 
-# schedule.every().day.at("23:59").do(job)
-schedule.every().minute.at(":30").do(job)
+schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)
 
 if __name__ == "__main__":
     while True:
