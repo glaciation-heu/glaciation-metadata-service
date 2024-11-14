@@ -13,9 +13,7 @@ import requests
 import schedule
 from loguru import logger
 
-temp_value = getenv("TIME_WINDOW_MILLISECONDS", "86400000")
-logger.debug(f"Value read from env: {temp_value}\nAnd its type: {type(temp_value)}")
-TIME_WINDOW_MILLISECONDS = int(temp_value)
+TIME_WINDOW_MILLISECONDS = int(float(getenv("TIME_WINDOW_MILLISECONDS", "86400000")))
 
 
 def read_file(fname):
