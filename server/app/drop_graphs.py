@@ -42,6 +42,7 @@ def get_timestamps() -> Dict[str, int]:
             "results"
         ]["bindings"]
     ]
+    logger.debug(local_query(read_file("app/query_files/query_timestamps.txt")))
     timestamps = {}
     for graphURI in graphURIs:
         found = search(r"timestamp:(\d+)", graphURI)
@@ -63,18 +64,7 @@ def job():
         if timestamps[graphURI] < cutoff_timestamp:
             query = f"DROP GRAPH <{graphURI}>"
 
-            params = {"query": query}
-            encoded_query = urlencode(params)
-            base_url = (
-                "http://localhost:80/api/v0/graph"  # Address of the Metadata Service!
-            )
-            full_url = f"{base_url}?{encoded_query}"
-            logger.debug(full_url)
-
-            # response = requests.post(full_url)
-            # # res=super_local_query("DROP GRAPH <" + timestamps[i]+'>')
-            # logger.debug(response)
-
+            local_query(query)
             logger.info(f"Dropped graph <{graphURI}>.")
 
 
