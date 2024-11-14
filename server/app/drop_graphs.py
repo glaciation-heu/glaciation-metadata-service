@@ -4,6 +4,7 @@
 from typing import Any, Dict
 
 from datetime import datetime, timedelta
+from os import getenv
 from re import search
 from time import sleep
 from urllib.parse import urlencode
@@ -11,6 +12,8 @@ from urllib.parse import urlencode
 import requests
 import schedule
 from loguru import logger
+
+TIME_WINDOW_MILLISECONDS = int(getenv("TIME_WINDOW_MILLISECONDS", "86400000"))
 
 
 def read_file(fname):
@@ -58,7 +61,7 @@ def job():
 
     logger.debug(f"Timestamps found:\n{timestamps}")
 
-    cutoff_time = datetime.now() - timedelta(days=1)
+    cutoff_time = datetime.now() - timedelta(milliseconds=TIME_WINDOW_MILLISECONDS)
     cutoff_timestamp = int(cutoff_time.timestamp()) * 1000
 
     for graphURI in timestamps:
