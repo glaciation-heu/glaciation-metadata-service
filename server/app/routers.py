@@ -135,3 +135,21 @@ async def search_graph(
         raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
     return EMPTY_SEARCH_RESPONSE
+
+
+@router.get(
+    "/api/v0/graph/update",
+)
+async def perform_update_query(
+    query: SPARQLQuery,
+) -> str:
+    """Execute SPARQL update query and return a response."""
+    valid, msg = fuseki.validate_sparql(query, "update")
+
+    if valid:
+        fuseki.update_query(query)
+        return "Success"
+    else:
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_400_BAD_REQUEST, msg)

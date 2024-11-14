@@ -18,13 +18,15 @@ def read_file(fname):
         return f.read()
 
 
-def local_query(query: str) -> Any:
+def local_query(query: str, update_query: bool = False) -> Any:
     """
     Queries Local Metadata service
     """
     params = {"query": query}
     encoded_query = urlencode(params)
     base_url = "http://localhost:80/api/v0/graph"  # Address of the Metadata Service!
+    if update_query:
+        base_url += "/update"
     full_url = f"{base_url}?{encoded_query}"
 
     try:
@@ -64,7 +66,7 @@ def job():
         if timestamps[graphURI] < cutoff_timestamp:
             query = f"DROP GRAPH <{graphURI}>"
 
-            local_query(query)
+            local_query(query, True)
             logger.info(f"Dropped graph <{graphURI}>.")
 
 
