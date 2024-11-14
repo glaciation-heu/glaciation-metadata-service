@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://github.com/glaciation-heu/glaciation-metadata-service/blob/main/LICENSE
-  version: 0.5.11
+  version: 0.5.12
 paths:
   /api/v0/graph:
     patch:
