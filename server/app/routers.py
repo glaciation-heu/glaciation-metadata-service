@@ -95,7 +95,7 @@ def compose_insert_query_form_graph(
 ) -> tuple[str, int]:
     n_triples = 0
     query = "INSERT DATA {\n"
-    query += "\tGRAPH " + graph_name + " {\n"  # "\tGRAPH <timestamp:%d> {\n" % ts
+    query += "\tGRAPH <" + graph_name + "> {\n"  # "\tGRAPH <timestamp:%d> {\n" % ts
     for s, p, o in g.triples((None, None, None)):
         if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
             query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
@@ -182,7 +182,7 @@ async def update_graph(
         if graph_name[-1] != "/":
             graph_name += "/"
 
-    graph_name = "<%stimestamp:%d>" % (graph_name, ts)
+    graph_name = "%stimestamp:%d" % (graph_name, ts)
 
     if len(timestamps) == 0:
         # write the very first graph with a suffix /base
