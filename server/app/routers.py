@@ -197,7 +197,7 @@ async def update_graph(
         timestamp_previous = find_temp(timestamps)
         if timestamp_previous == "none":
             timestamp_previous = find_base(timestamps)
-        logger.debug(f"Previous graph was {graph_name}.")
+        logger.debug(f"Previous graph was {timestamp_previous}.")
 
         # reading previous graph
         query_g0 = simple_query.replace("graph1", timestamp_previous)
@@ -214,9 +214,13 @@ async def update_graph(
             delta_minus, graph_name + "/removed"
         )
         fuseki.update_query(query_plus)
-        logger.debug(f"Inserted {n_triples_plus} triple(s) into graph {graph_name}.")
+        logger.debug(
+            f"Inserted {n_triples_plus} triple(s) into graph {graph_name + '/added'}."
+        )
         fuseki.update_query(query_minus)
-        logger.debug(f"Inserted {n_triples_minus} triple(s) into graph {graph_name}.")
+        logger.debug(
+            f"Inserted {n_triples_minus} triple(s) into graph {graph_name+'/removed'} ."
+        )
         # remove previous temp graph
         if "temp" in timestamp_previous:
             query_delete = f"DROP GRAPH <{timestamp_previous}>"
