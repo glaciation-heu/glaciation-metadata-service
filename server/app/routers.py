@@ -117,6 +117,20 @@ def compose_insert_query_form_graph(
         raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
 
 
+def find_temp(timestamps):
+    for timestamp in timestamps:
+        if "temp" in timestamp:
+            return timestamp
+    return "none"
+
+
+def find_base(timestamps):
+    for timestamp in timestamps:
+        if "base" in timestamp:
+            return timestamp
+    return "no base"
+
+
 @router.patch(
     "/api/v0/graph",
 )
@@ -136,7 +150,6 @@ async def update_graph(
     g.parse(StringIO(dumps(body)), format="json-ld")
 
     ts = int(time() * 1000)  # current timestamp
-    n_triples = 0
 
     graph_name = ""
     if "@id" in body:
