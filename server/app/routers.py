@@ -6,7 +6,7 @@ from time import time
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
-from rdflib import ConjunctiveGraph
+from rdflib import ConjunctiveGraph, Graph, URIRef, Literal, BNode
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
@@ -82,6 +82,39 @@ def perform_query(query: SPARQLQuery, fuseki: FusekiCommunicatior) -> SearchResp
     return EMPTY_SEARCH_RESPONSE
 
 
+def compose_insert_query_form_graph(g: ConjunctiveGraph, graph_name: str) -> str:
+    n_triples = 0
+    query = "INSERT DATA {\n"
+    query += "\tGRAPH " + graph_name + " {\n"  # "\tGRAPH <timestamp:%d> {\n" % ts
+    for s, p, o in g.triples((None, None, None)):
+        if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
+            query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
+            n_triples += 1
+        else:
+            raise HTTPException(
+                HTTP_500_INTERNAL_SERVER_ERROR, "Error in parsing JSON-LD."
+            )
+    query += "\t}\n"
+    query += "}"
+
+    valid, msg = fuseki.validate_sparql(query, "update")
+
+    # return query, valid, msg
+    if n_triples == 0:
+        logger.error("No triples could be extracted from Graph")
+        raise HTTPException(
+            HTTP_400_BAD_REQUEST, "No triples could be extracted from Graph."
+        )
+
+    elif valid:
+        logger.debug(f"Return query with {n_triples} triple(s) and name {graph_name}.")
+        return query, n_triples, graph_name
+    else:
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
+
+
 @router.patch(
     "/api/v0/graph",
 )
@@ -109,35 +142,16 @@ async def update_graph(
         if graph_name[-1] != "/":
             graph_name += "/"
 
-    query = "INSERT DATA {\n"
-    query += "\tGRAPH <%stimestamp:%d> {\n" % (graph_name, ts)
-    for s, p, o in g.triples((None, None, None)):
-        if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
-            query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
-            n_triples += 1
-        else:
-            raise HTTPException(
-                HTTP_500_INTERNAL_SERVER_ERROR, "Error in parsing JSON-LD."
-            )
-    query += "\t}\n"
-    query += "}"
+    graph_name = '<%stimestamp:%d>' %  (graph_name, ts)
 
-    valid, msg = fuseki.validate_sparql(query, "update")
+    query, n_triples, graph_name = compose_insert_query_form_graph(g, graph_name)
+    
+    fuseki.update_query(query)
+    logger.debug(
+            f"Inserted {n_triples} triple(s) into graph {graph_name}."
+        )
 
-    if n_triples == 0:
-        logger.error("No triples could be extracted from JSON-LD.")
-        raise HTTPException(
-            HTTP_400_BAD_REQUEST, "No triples could be extracted from JSON-LD."
-        )
-    elif valid:
-        fuseki.update_query(query)
-        logger.debug(
-            f"Inserted {n_triples} triple(s) into graph <{graph_name}timestamp:{ts}>."
-        )
-    else:
-        logger.error(msg)
-        logger.debug(f"The query:\n{query}")
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
+
 
     return "Success"
 
