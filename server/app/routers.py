@@ -6,7 +6,7 @@ from time import time
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
-from rdflib import ConjunctiveGraph, Graph, URIRef, Literal, BNode
+from rdflib import ConjunctiveGraph  # BNode , ConjunctiveGraph, Graph, Literal, URIRef
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
@@ -82,7 +82,9 @@ def perform_query(query: SPARQLQuery, fuseki: FusekiCommunicatior) -> SearchResp
     return EMPTY_SEARCH_RESPONSE
 
 
-def compose_insert_query_form_graph(g: ConjunctiveGraph, graph_name: str) -> str:
+def compose_insert_query_form_graph(
+    g: ConjunctiveGraph, graph_name: str
+) -> tuple[str, int, str]:
     n_triples = 0
     query = "INSERT DATA {\n"
     query += "\tGRAPH " + graph_name + " {\n"  # "\tGRAPH <timestamp:%d> {\n" % ts
@@ -142,16 +144,12 @@ async def update_graph(
         if graph_name[-1] != "/":
             graph_name += "/"
 
-    graph_name = '<%stimestamp:%d>' %  (graph_name, ts)
+    graph_name = "<%stimestamp:%d>" % (graph_name, ts)
 
     query, n_triples, graph_name = compose_insert_query_form_graph(g, graph_name)
-    
+
     fuseki.update_query(query)
-    logger.debug(
-            f"Inserted {n_triples} triple(s) into graph {graph_name}."
-        )
-
-
+    logger.debug(f"Inserted {n_triples} triple(s) into graph {graph_name}.")
 
     return "Success"
 
