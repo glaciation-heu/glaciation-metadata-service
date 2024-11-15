@@ -38,3 +38,12 @@ readinessProbe:
     port: http
 
 ingressHostName: metadata-service
+
+tripleStoreAddress:
+  url: jena-fuseki-test
+  port: 3030
+  datasetName: slice
+
+keepGraphs:
+  timeWindowMilliseconds: 86400000
+  intervalToCheckInSeconds: 3600

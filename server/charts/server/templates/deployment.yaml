@@ -44,6 +44,24 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: TRIPLE_STORE_URL
+              value: "{{ .Values.tripleStoreAddress.url }}"
+            - name: TRIPLE_STORE_PORT
+              value: "{{ .Values.tripleStoreAddress.port }}"
+            - name: TRIPLE_STORE_DATASET
+              value: "{{ .Values.tripleStoreAddress.datasetName }}"
+        - name: drop-graphs-sidecar
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python", "app/drop_graphs.py"]
+          env:
+            - name: TIME_WINDOW_MILLISECONDS
+              value: "{{ .Values.keepGraphs.timeWindowMilliseconds }}"
+            - name: INTERVAL_TO_CHECK_IN_SECONDS
+              value: "{{ .Values.keepGraphs.intervalToCheckInSeconds }}"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

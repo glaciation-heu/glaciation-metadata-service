@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://github.com/glaciation-heu/glaciation-metadata-service/blob/main/LICENSE
-  version: 0.5.1
+  version: 0.5.28
 paths:
   /api/v0/graph:
     patch:
@@ -61,6 +61,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v0/graph/update:
+    get:
+      tags:
+      - Graph
+      summary: Perform Update Query
+      description: Execute SPARQL update query and return a response.
+      operationId: perform_update_query_api_v0_graph_update_get
+      parameters:
+      - name: query
+        in: query
+        required: true
+        schema:
+          type: string
+          description: SELECT query in SPARQL language. It must be compatible with
+            GLACIATION metadata upper ontology.
+          title: Query
+        description: SELECT query in SPARQL language. It must be compatible with GLACIATION
+          metadata upper ontology.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: string
+                title: Response Perform Update Query Api V0 Graph Update Get
         '422':
           description: Validation Error
           content:

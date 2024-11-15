@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 from io import StringIO
 from json import dumps
+from os import getenv
 from time import time
 
 from fastapi import APIRouter, HTTPException
@@ -27,9 +28,9 @@ from app.schemas import (
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
-fuseki_jena_url = "jena-fuseki-test"
-fuseki_jena_port = 3030
-fuseki_jena_dataset_name = "slice"
+fuseki_jena_url = getenv("TRIPLE_STORE_URL", "jena-fuseki")
+fuseki_jena_port = getenv("TRIPLE_STORE_PORT")
+fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
 fuseki = FusekiCommunicatior(
     fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
 )
@@ -135,3 +136,21 @@ async def search_graph(
         raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
     return EMPTY_SEARCH_RESPONSE
+
+
+@router.get(
+    "/api/v0/graph/update",
+)
+async def perform_update_query(
+    query: SPARQLQuery,
+) -> str:
+    """Execute SPARQL update query and return a response."""
+    valid, msg = fuseki.validate_sparql(query, "update")
+
+    if valid:
+        fuseki.update_query(query)
+        return "Success"
+    else:
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_400_BAD_REQUEST, msg)
