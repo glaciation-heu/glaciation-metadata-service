@@ -6,7 +6,7 @@ from time import time
 
 from fastapi import APIRouter, HTTPException
 from loguru import logger
-from rdflib import ConjunctiveGraph  # BNode , ConjunctiveGraph, Graph, Literal, URIRef
+from rdflib import BNode, ConjunctiveGraph, Literal, URIRef  # Graph
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
@@ -54,6 +54,14 @@ SELECT ?graphURI WHERE {
 ORDER BY ASC(xsd:integer(replace(str(?graphURI), "^timestamp:", "")))
 """
 
+simple_query = """SELECT ?s ?p ?o
+WHERE {
+  GRAPH <graph1> {
+    ?s ?p ?o.
+    }
+}
+"""
+
 
 def perform_query(query: SPARQLQuery, fuseki: FusekiCommunicatior) -> SearchResponse:
     valid, msg = fuseki.validate_sparql(query, "query")
@@ -84,7 +92,7 @@ def perform_query(query: SPARQLQuery, fuseki: FusekiCommunicatior) -> SearchResp
 
 def compose_insert_query_form_graph(
     g: ConjunctiveGraph, graph_name: str
-) -> tuple[str, int, str]:
+) -> tuple[str, int]:
     n_triples = 0
     query = "INSERT DATA {\n"
     query += "\tGRAPH " + graph_name + " {\n"  # "\tGRAPH <timestamp:%d> {\n" % ts
@@ -110,7 +118,7 @@ def compose_insert_query_form_graph(
 
     elif valid:
         logger.debug(f"Return query with {n_triples} triple(s) and name {graph_name}.")
-        return query, n_triples, graph_name
+        return query, n_triples
     else:
         logger.error(msg)
         logger.debug(f"The query:\n{query}")
@@ -129,6 +137,23 @@ def find_base(timestamps):
         if "base" in timestamp:
             return timestamp
     return "no base"
+
+
+def get_graph_from_bindings(bindings):
+    triple_type = {"uri": URIRef, "literal": Literal, "bnode": BNode}
+
+    g = ConjunctiveGraph()
+
+    for binding in bindings:  # response.results.bindings:
+        g.add(
+            (
+                triple_type[binding["s"]["type"]](binding["s"]["value"]),
+                triple_type[binding["p"]["type"]](binding["p"]["value"]),
+                triple_type[binding["o"]["type"]](binding["o"]["value"]),
+            )
+        )
+
+    return g
 
 
 @router.patch(
@@ -159,10 +184,52 @@ async def update_graph(
 
     graph_name = "<%stimestamp:%d>" % (graph_name, ts)
 
-    query, n_triples, graph_name = compose_insert_query_form_graph(g, graph_name)
+    if len(timestamps) == 0:
+        # write the very first graph with a suffix /base
+        query, n_triples = compose_insert_query_form_graph(g, graph_name + "/base")
 
-    fuseki.update_query(query)
-    logger.debug(f"Inserted {n_triples} triple(s) into graph {graph_name}.")
+        fuseki.update_query(query)
+        logger.debug(
+            f"Inserted {n_triples} triple(s) into graph {graph_name}. Base Graph!"
+        )
+    else:
+        # finding previous graph
+        timestamp_previous = find_temp(timestamps)
+        if timestamp_previous == "none":
+            timestamp_previous = find_base(timestamps)
+        logger.debug(f"Previous graph was {graph_name}.")
+
+        # reading previous graph
+        query_g0 = simple_query.replace("graph1", timestamp_previous)
+        response = perform_query(query_g0, fuseki)
+        g0 = get_graph_from_bindings(response.results.bindings)
+
+        delta_plus = g - g0
+        delta_minus = g0 - g
+
+        query_plus, n_triples_plus = compose_insert_query_form_graph(
+            delta_plus, graph_name + "/added"
+        )
+        query_minus, n_triples_minus = compose_insert_query_form_graph(
+            delta_minus, graph_name + "/removed"
+        )
+        fuseki.update_query(query_plus)
+        logger.debug(f"Inserted {n_triples_plus} triple(s) into graph {graph_name}.")
+        fuseki.update_query(query_minus)
+        logger.debug(f"Inserted {n_triples_minus} triple(s) into graph {graph_name}.")
+        # remove previous temp graph
+        if "temp" in timestamp_previous:
+            query_delete = f"DROP GRAPH <{timestamp_previous}>"
+            fuseki.update_query(query_delete)
+            logger.debug("Removed old temporal")
+
+        # add new temporal graph
+        query_temp, n_triples_temp = compose_insert_query_form_graph(
+            g, graph_name + "/temp"
+        )
+        fuseki.update_query(query_temp)
+
+        logger.debug(f"Added new temporal {n_triples_temp} triples")
 
     return "Success"
 
