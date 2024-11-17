@@ -40,7 +40,7 @@ readinessProbe:
 ingressHostName: metadata-service
 
 tripleStoreAddress:
-  url: jena-fuseki-test
+  url: jena-fuseki
   port: 3030
   datasetName: slice
 
