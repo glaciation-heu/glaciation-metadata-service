@@ -3,6 +3,7 @@ from typing import Any, Dict
 from io import StringIO
 from json import dumps
 from os import getenv
+from re import findall
 from time import time
 
 from fastapi import APIRouter, HTTPException
@@ -145,12 +146,18 @@ async def perform_update_query(
     query: SPARQLQuery,
 ) -> str:
     """Execute SPARQL update query and return a response."""
-    valid, msg = fuseki.validate_sparql(query, "update")
+    queries = findall(r"DROP GRAPH <.*?>;?", query)
+    if len(queries) == 0:
+        queries = [query]
 
-    if valid:
-        fuseki.update_query(query)
-        return "Success"
-    else:
-        logger.error(msg)
-        logger.debug(f"The query:\n{query}")
-        raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+    for single_query in queries:
+        valid, msg = fuseki.validate_sparql(single_query, "update")
+
+        if valid:
+            fuseki.update_query(single_query)
+        else:
+            logger.error(msg)
+            logger.debug(f"The query:\n{single_query}")
+            raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+
+    return "Success"

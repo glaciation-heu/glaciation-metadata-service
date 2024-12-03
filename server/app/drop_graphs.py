@@ -67,13 +67,13 @@ def job():
     cutoff_time = datetime.now() - timedelta(milliseconds=TIME_WINDOW_MILLISECONDS)
     cutoff_timestamp = int(cutoff_time.timestamp()) * 1000
 
+    query = ""
     for graphURI in timestamps:
         if timestamps[graphURI] < cutoff_timestamp:
-            query = f"DROP GRAPH <{graphURI}>;"
+            query += f"DROP GRAPH <{graphURI}>;\n"
 
-            local_query(query, True)
-            logger.info(f"Dropped graph <{graphURI}>.")
-            sleep(5)
+    local_query(query, True)
+    logger.info(f"Performed the following query:\n{query}")
 
 
 schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)
