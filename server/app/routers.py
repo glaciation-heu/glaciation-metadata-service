@@ -9,6 +9,7 @@ from time import time
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 from rdflib import ConjunctiveGraph
+from requests import post
 from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
@@ -161,3 +162,27 @@ async def perform_update_query(
             raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
     return "Success"
+
+
+@router.post(
+    "/api/v0/graph/compact",
+)
+async def perform_compaction() -> str:
+    port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
+    url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
+
+    params = {"deleteOld": "true"}
+
+    try:
+        response = post(url, params=params)
+
+        if response.status_code == 200:
+            logger.info("Compaction triggered successfully!")
+            logger.debug(response.text)
+            return "Success"
+        else:
+            logger.error(f"Compaction failed: {response.text}")
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
+    except Exception as e:
+        logger.exception("An unexpected error occurred during compaction.")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))

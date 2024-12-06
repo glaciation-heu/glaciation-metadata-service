@@ -59,6 +59,20 @@ def get_timestamps() -> Dict[str, int]:
     return timestamps
 
 
+def compaction() -> None:
+    url = "http://localhost:80/api/v0/graph/compact"
+
+    try:
+        response = requests.post(url)
+        if response.status_code == 200:
+            logger.info("Compaction triggered successfully!")
+            logger.debug(response.text)
+        else:
+            logger.error(f"Compaction failed: {response.text}")
+    except Exception as e:
+        logger.exception(f"An unexpected error occurred during compaction: {str(e)}")
+
+
 def job():
     timestamps = get_timestamps()
 
@@ -74,6 +88,8 @@ def job():
 
     local_query(query, True)
     logger.info(f"Performed the following query:\n{query}")
+
+    compaction()
 
 
 schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)
