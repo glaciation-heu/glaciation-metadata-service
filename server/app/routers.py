@@ -127,6 +127,8 @@ async def search_graph(
                                 new_item[key]["xml:lang"] = new_item[key].pop("lang")
                 bindings.append(new_item)
 
+            logger.debug(f"Found {len(bindings)} result(s).")
+
             return SearchResponse(
                 head=ResponseHead(vars=result.head["vars"]),
                 results=ResponseResults(bindings=bindings),

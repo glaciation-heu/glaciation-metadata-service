@@ -14,7 +14,7 @@ class CustomFastAPI(FastAPI):
             return self.openapi_schema
         openapi_schema = get_openapi(
             title="GLACIATION Metadata Service",
-            version="1.1.0",  # Same as service version but without minor part
+            version="1.2",  # Same as service version but without minor part
             description=(
                 "The service exposes API to work with Distributed Knowledge Graph"
             ),
