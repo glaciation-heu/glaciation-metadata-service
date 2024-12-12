@@ -89,7 +89,7 @@ def job():
     local_query(query, True)
     logger.info(f"Performed the following query:\n{query}")
 
-    compaction()
+    # compaction()
 
 
 schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)

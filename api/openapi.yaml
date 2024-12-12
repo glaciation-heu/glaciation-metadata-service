@@ -5,7 +5,7 @@ info:
   license:
     name: MIT License
     url: https://github.com/glaciation-heu/glaciation-metadata-service/blob/main/LICENSE
-  version: 1.2.2
+  version: 1.2.3
 paths:
   /api/v0/graph:
     patch:
@@ -99,20 +99,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v0/graph/compact:
-    post:
-      tags:
-      - Graph
-      summary: Perform Compaction
-      operationId: perform_compaction_api_v0_graph_compact_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: string
-                title: Response Perform Compaction Api V0 Graph Compact Post
   /metrics:
     get:
       tags:
