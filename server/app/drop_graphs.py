@@ -69,10 +69,9 @@ def compaction() -> None:
             if response.status_code == 200:
                 logger.info("Compaction triggered successfully!")
                 logger.debug(response.text)
-                compacted = True
             else:
                 logger.error(f"Compaction failed: {response.text}")
-                sleep(1)
+            compacted = True
         except Exception as e:
             logger.exception(
                 f"An unexpected error occurred during compaction: {str(e)}"
