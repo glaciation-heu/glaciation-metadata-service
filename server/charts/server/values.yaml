@@ -45,5 +45,5 @@ tripleStoreAddress:
   datasetName: slice
 
 keepGraphs:
-  timeWindowMilliseconds: 86400000
-  intervalToCheckInSeconds: 3600
+  timeWindowMilliseconds: 21600000
+  intervalToCheckInSeconds: 600

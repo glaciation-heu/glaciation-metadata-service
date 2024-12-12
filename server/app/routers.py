@@ -38,26 +38,6 @@ fuseki = FusekiCommunicatior(
 )
 
 
-def compaction() -> None:
-    port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
-    url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
-
-    params = {"deleteOld": "true"}
-
-    try:
-        response = post(url, params=params)
-
-        if response.status_code == 200:
-            logger.info("Compaction triggered successfully!")
-            logger.debug(response.text)
-        else:
-            logger.error(f"Compaction failed: {response.text}")
-            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
-    except Exception as e:
-        logger.exception("An unexpected error occurred during compaction.")
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
-
-
 @router.get(
     "/",
     status_code=HTTP_303_SEE_OTHER,
@@ -184,30 +164,28 @@ async def perform_update_query(
             logger.debug(f"The query:\n{single_query}")
             raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
-    compaction()
-
     return "Success"
 
 
-# @router.post(
-#     "/api/v0/graph/compact",
-# )
-# async def perform_compaction() -> str:
-#     port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
-#     url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
+@router.post(
+    "/api/v0/graph/compact",
+)
+async def perform_compaction() -> str:
+    port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
+    url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
 
-#     params = {"deleteOld": "true"}
+    params = {"deleteOld": "true"}
 
-#     try:
-#         response = post(url, params=params)
+    try:
+        response = post(url, params=params)
 
-#         if response.status_code == 200:
-#             logger.info("Compaction triggered successfully!")
-#             logger.debug(response.text)
-#             return "Success"
-#         else:
-#             logger.error(f"Compaction failed: {response.text}")
-#             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
-#     except Exception as e:
-#         logger.exception("An unexpected error occurred during compaction.")
-#         raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+        if response.status_code == 200:
+            logger.info("Compaction triggered successfully!")
+            logger.debug(response.text)
+            return "Success"
+        else:
+            logger.error(f"Compaction failed: {response.text}")
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
+    except Exception as e:
+        logger.exception("An unexpected error occurred during compaction.")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
