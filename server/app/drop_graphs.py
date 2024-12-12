@@ -13,9 +13,10 @@ import requests
 import schedule
 from loguru import logger
 
-TIME_WINDOW_MILLISECONDS = int(float(getenv("TIME_WINDOW_MILLISECONDS", "86400000")))
-INTERVAL_TO_CHECK_IN_SECONDS = int(
-    float(getenv("INTERVAL_TO_CHECK_IN_SECONDS", "86400"))
+TIME_WINDOW_MILLISECONDS = int(float(getenv("TIME_WINDOW_MILLISECONDS", "21600000")))
+INTERVAL_TO_CHECK_IN_SECONDS = int(float(getenv("INTERVAL_TO_CHECK_IN_SECONDS", "300")))
+COMPACTION_INTERVAL_IN_SECONDS = int(
+    float(getenv("COMPACTION_INTERVAL_IN_SECONDS", "3600"))
 )
 
 
@@ -95,10 +96,9 @@ def job():
     local_query(query, True)
     logger.info(f"Performed the following query:\n{query}")
 
-    compaction()
-
 
 schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)
+schedule.every(COMPACTION_INTERVAL_IN_SECONDS).seconds.do(compaction)
 
 if __name__ == "__main__":
     while True:

@@ -62,6 +62,8 @@ spec:
               value: "{{ .Values.keepGraphs.timeWindowMilliseconds }}"
             - name: INTERVAL_TO_CHECK_IN_SECONDS
               value: "{{ .Values.keepGraphs.intervalToCheckInSeconds }}"
+            - name: COMPACTION_INTERVAL_IN_SECONDS
+              value: "{{ .Values.keepGraphs.compactionIntervalInSeconds }}"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

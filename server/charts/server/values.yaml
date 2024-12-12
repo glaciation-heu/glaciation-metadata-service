@@ -33,13 +33,13 @@ livenessProbe:
     path: /
     port: http
   periodSeconds: 30
-  timeoutSeconds: 15
+  timeoutSeconds: 20
 readinessProbe:
   httpGet:
     path: /
     port: http
   periodSeconds: 30
-  timeoutSeconds: 15
+  timeoutSeconds: 20
 
 ingressHostName: metadata-service
 
@@ -50,4 +50,5 @@ tripleStoreAddress:
 
 keepGraphs:
   timeWindowMilliseconds: 21600000
-  intervalToCheckInSeconds: 1800
+  intervalToCheckInSeconds: 300
+  compactionIntervalInSeconds: 3600
