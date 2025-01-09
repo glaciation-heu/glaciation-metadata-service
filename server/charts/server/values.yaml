@@ -50,5 +50,5 @@ tripleStoreAddress:
 
 keepGraphs:
   timeWindowMilliseconds: 21600000
-  intervalToCheckInSeconds: 300
-  compactionIntervalInSeconds: 3600
+  intervalToCheckInSeconds: 150
+  compactionIntervalInSeconds: 1800
