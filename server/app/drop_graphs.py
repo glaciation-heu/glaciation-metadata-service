@@ -93,8 +93,13 @@ def job():
         if timestamps[graphURI] < cutoff_timestamp:
             query += f"DROP GRAPH <{graphURI}>;\n"
 
-    local_query(query, True)
-    logger.info(f"Performed the following query:\n{query}")
+    if query == "":
+        logger.info(
+            f"There are no graphs older than {TIME_WINDOW_MILLISECONDS*1e-3} s."
+        )
+    else:
+        local_query(query, True)
+        logger.info(f"Performed the following query:\n{query}")
 
 
 schedule.every(INTERVAL_TO_CHECK_IN_SECONDS).seconds.do(job)
