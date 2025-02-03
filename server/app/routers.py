@@ -176,7 +176,7 @@ async def perform_post_update_query(
 ) -> str:
     """Execute SPARQL update query and return a response."""
 
-    if "query" not in query or len(query) != 1 or isinstance(query["query"], str):
+    if "query" not in query or len(query) != 1 or not isinstance(query["query"], str):
         logger.error("Request must contain only {'query': str}")
         raise HTTPException(
             HTTP_400_BAD_REQUEST, "Request must contain only {'query': str}"
