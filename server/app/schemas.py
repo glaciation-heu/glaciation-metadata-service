@@ -76,3 +76,13 @@ SPARQLQuery = Annotated[
         ),
     ),
 ]
+
+UpdateSPARQLQuery = Annotated[
+    dict[str, Any],
+    Body(
+        description=(
+            "Update query in SPARQL language. "
+            "It must be compatible with GLACIATION metadata upper ontology."
+        ),
+    ),
+]

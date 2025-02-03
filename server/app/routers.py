@@ -26,6 +26,7 @@ from app.schemas import (
     SearchResponse,
     SPARQLQuery,
     UpdateRequestBody,
+    UpdateSPARQLQuery,
 )
 
 router = APIRouter(tags=[TagEnum.GRAPH])
@@ -152,6 +153,38 @@ async def perform_update_query(
     queries = findall(r"DROP GRAPH <.*?>;?", query)
     if len(queries) == 0:
         queries = [query]
+
+    for single_query in queries:
+        valid, msg = fuseki.validate_sparql(single_query, "update")
+
+        if valid:
+            fuseki.update_query(single_query)
+            logger.debug(f'Performed "{single_query}".')
+        else:
+            logger.error(msg)
+            logger.debug(f"The query:\n{single_query}")
+            raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+
+    return "Success"
+
+
+@router.post(
+    "/api/v0/graph/update",
+)
+async def perform_post_update_query(
+    query: UpdateSPARQLQuery,
+) -> str:
+    """Execute SPARQL update query and return a response."""
+
+    if "query" not in query or len(query) != 1 or isinstance(query["query"], str):
+        logger.error("Request must contain only {'query': str}")
+        raise HTTPException(
+            HTTP_400_BAD_REQUEST, "Request must contain only {'query': str}"
+        )
+
+    queries = findall(r"DROP GRAPH <.*?>;?", query["query"])
+    if len(queries) == 0:
+        queries = [query["query"]]
 
     for single_query in queries:
         valid, msg = fuseki.validate_sparql(single_query, "update")
