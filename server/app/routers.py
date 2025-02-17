@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 from json import dumps
-from os import getenv
+from os import environ, getenv
 from re import findall
 from time import time
 
@@ -91,7 +91,8 @@ async def update_graph(
             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
     except Exception as e:
         logger.exception("Error occured")
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+        if "KUBERNETES_SERVICE_HOST" in environ:
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
     return "Success"
 
