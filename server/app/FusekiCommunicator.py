@@ -37,11 +37,11 @@ class FusekiCommunicatior:
         self.dataset_name = dataset_name
 
         port_placeholder = f":{self.port}" if self.port is not None else ""
-        self.sparql = SPARQLWrapper2(
-            "http://{}{}/{}".format(
-                self.fuseki_url, port_placeholder, self.dataset_name
-            )
+
+        self.url = "http://{}{}/{}".format(
+            self.fuseki_url, port_placeholder, self.dataset_name
         )
+        self.sparql = SPARQLWrapper2(self.url)
         self.sparql.method = "POST"
 
     def validate_sparql(

@@ -37,6 +37,7 @@ fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
 fuseki = FusekiCommunicatior(
     fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
 )
+FUSEKI_URL = f"{fuseki.url}/data"
 
 
 @router.get(
@@ -56,47 +57,42 @@ async def update_graph(
     body: UpdateRequestBody,
 ) -> str:
     """Update Distributed Knowledge Graph"""
-    g = ConjunctiveGraph()
-    g.parse(StringIO(dumps(body)), format="json-ld")
-
     ts = int(time() * 1000)  # current timestamp
-    n_triples = 0
 
     graph_name = ""
     if "@id" in body:
         graph_name = body["@id"]
         if graph_name[-1] != "/":
             graph_name += "/"
+    graph_name += f"timestamp:{ts}"
+    body["@id"] = graph_name
 
-    query = "INSERT DATA {\n"
-    query += "\tGRAPH <%stimestamp:%d> {\n" % (graph_name, ts)
-    for s, p, o in g.triples((None, None, None)):
-        if hasattr(s, "n3") and hasattr(p, "n3") and hasattr(o, "n3"):
-            query += f"\t\t{s.n3()} {p.n3()} {o.n3()} .\n"
-            n_triples += 1
-        else:
-            raise HTTPException(
-                HTTP_500_INTERNAL_SERVER_ERROR, "Error in parsing JSON-LD."
-            )
-    query += "\t}\n"
-    query += "}"
+    json_ld_str = dumps(body)
 
-    valid, msg = fuseki.validate_sparql(query, "update")
+    g = ConjunctiveGraph()
+    g.parse(data=json_ld_str, format="json-ld")
+    n_triples = len(g)
 
     if n_triples == 0:
         logger.error("No triples could be extracted from JSON-LD.")
         raise HTTPException(
             HTTP_400_BAD_REQUEST, "No triples could be extracted from JSON-LD."
         )
-    elif valid:
-        fuseki.update_query(query)
-        logger.debug(
-            f"Inserted {n_triples} triple(s) into graph <{graph_name}timestamp:{ts}>."
+
+    try:
+        response = post(
+            FUSEKI_URL,
+            data=json_ld_str,
+            headers={"Content-Type": "application/ld+json"},
         )
-    else:
-        logger.error(msg)
-        logger.debug(f"The query:\n{query}")
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, msg)
+        if response.status_code == 200:
+            logger.debug(f"Inserted {n_triples} triple(s) into graph <{graph_name}>.")
+        else:
+            logger.error(f"Response: {response.text}")
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
+    except Exception as e:
+        logger.exception("Error occured")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
     return "Success"
 
