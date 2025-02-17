@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-from io import StringIO
 from json import dumps
 from os import getenv
 from re import findall
