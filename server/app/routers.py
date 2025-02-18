@@ -64,9 +64,9 @@ def find_jena_ip():
             fuseki = FusekiCommunicatior(
                 fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
             )
-        logger.info(f"Using for Jena Fuseki: {fuseki.url}")
     else:
         logger.warning(f"Jena Fuseki could not be found on node '{MY_NODE_NAME}'.")
+    logger.info(f"Using for Jena Fuseki: {fuseki.url}")
 
 
 @router.get(
