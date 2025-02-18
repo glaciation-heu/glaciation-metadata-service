@@ -25,6 +25,7 @@ loguru = "^0.7.2"
 types-requests = "^2.32.0.20241016"
 requests = "^2.32.3"
 schedule = "^1.2.2"
+kubernetes = "^32.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.12"

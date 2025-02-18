@@ -6,6 +6,7 @@ from re import findall
 from time import time
 
 from fastapi import APIRouter, HTTPException
+from kubernetes import client, config
 from loguru import logger
 from rdflib import ConjunctiveGraph
 from requests import post
@@ -36,7 +37,36 @@ fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
 fuseki = FusekiCommunicatior(
     fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
 )
-FUSEKI_URL = f"{fuseki.url}/data"
+MY_NODE_NAME = getenv("MY_NODE_NAME")
+MY_POD_NAMESPACE = getenv("MY_POD_NAMESPACE", "default")
+
+
+def find_jena_ip():
+    global fuseki, fuseki_jena_url
+    if "KUBERNETES_SERVICE_HOST" in environ:
+        config.load_incluster_config()
+    else:
+        logger.error("Not running in a Kubernetes cluster.")
+        return
+
+    # Initialize the API client
+    v1 = client.CoreV1Api()
+
+    # List Jena Fuseki pods in their namespace
+    label_selector = "app.kubernetes.io/name=jena-fuseki"
+    pods = v1.list_namespaced_pod(MY_POD_NAMESPACE, label_selector=label_selector)
+
+    addresses = {pod.spec.nodeName: pod.status.ip for pod in pods.items}
+
+    if MY_NODE_NAME in addresses:
+        if addresses[MY_NODE_NAME] != fuseki_jena_url:
+            fuseki_jena_url = addresses[MY_NODE_NAME]
+            fuseki = FusekiCommunicatior(
+                fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+            )
+        logger.info(f"Using for Jena Fuseki: {fuseki.url}")
+    else:
+        logger.warning(f"Jena Fuseki could not be found on node '{MY_NODE_NAME}'.")
 
 
 @router.get(
@@ -79,8 +109,9 @@ async def update_graph(
         )
 
     try:
+        find_jena_ip()
         response = post(
-            FUSEKI_URL,
+            fuseki.url,
             data=json_ld_str,
             headers={"Content-Type": "application/ld+json"},
         )
@@ -107,6 +138,7 @@ async def search_graph(
     valid, msg = fuseki.validate_sparql(query, "query")
 
     if valid:
+        find_jena_ip()
         result = fuseki.read_query(query)
 
         if type(result) is Bindings:
@@ -154,6 +186,7 @@ async def perform_update_query(
         valid, msg = fuseki.validate_sparql(single_query, "update")
 
         if valid:
+            find_jena_ip()
             fuseki.update_query(single_query)
             logger.debug(f'Performed "{single_query}".')
         else:
@@ -186,6 +219,7 @@ async def perform_post_update_query(
         valid, msg = fuseki.validate_sparql(single_query, "update")
 
         if valid:
+            find_jena_ip()
             fuseki.update_query(single_query)
             logger.debug(f'Performed "{single_query}".')
         else:
@@ -200,6 +234,7 @@ async def perform_post_update_query(
     "/api/v0/graph/compact",
 )
 async def perform_compaction() -> str:
+    find_jena_ip()
     port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
     url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
 
