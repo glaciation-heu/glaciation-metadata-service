@@ -56,7 +56,7 @@ def find_jena_ip():
     label_selector = "app.kubernetes.io/name=jena-fuseki"
     pods = v1.list_namespaced_pod(MY_POD_NAMESPACE, label_selector=label_selector)
 
-    addresses = {pod.spec.node_name: pod.status.ip for pod in pods.items}
+    addresses = {pod.spec.node_name: pod.status.pod_ip for pod in pods.items}
 
     if MY_NODE_NAME in addresses:
         if addresses[MY_NODE_NAME] != fuseki_jena_url:
