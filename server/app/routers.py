@@ -65,6 +65,12 @@ def find_jena_ip():
                 fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
             )
     else:
+        fuseki_jena_url_temp = getenv("TRIPLE_STORE_URL", "jena-fuseki")
+        if fuseki_jena_url != fuseki_jena_url_temp:
+            fuseki_jena_url = fuseki_jena_url_temp
+            fuseki = FusekiCommunicatior(
+                fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+            )
         logger.warning(f"Jena Fuseki could not be found on node '{MY_NODE_NAME}'.")
     logger.info(f"Using for Jena Fuseki: {fuseki.url}")
 
