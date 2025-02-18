@@ -18,7 +18,7 @@ serviceAccount:
   create: true
   automount: true
   annotations: {}
-  name: ""
+  name: "metadata-service"
 
 podAnnotations: {}
 podLabels: {}
