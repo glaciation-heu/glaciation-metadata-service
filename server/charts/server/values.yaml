@@ -37,14 +37,14 @@ livenessProbe:
   httpGet:
     path: /
     port: http
-  periodSeconds: 30
-  timeoutSeconds: 20
+  periodSeconds: 60
+  timeoutSeconds: 40
 readinessProbe:
   httpGet:
     path: /
     port: http
-  periodSeconds: 30
-  timeoutSeconds: 20
+  periodSeconds: 60
+  timeoutSeconds: 40
 
 ingressHostName: metadata-service
 
