@@ -1,8 +1,9 @@
 from typing import Any, Dict
 
-from json import dumps
-from os import environ, getenv
-from re import findall
+from glob import glob
+from json import dump, dumps
+from os import environ, getenv, makedirs, path, remove
+from re import findall, sub
 from time import time
 
 from fastapi import APIRouter, HTTPException
@@ -40,6 +41,10 @@ fuseki = FusekiCommunicatior(
 MY_NODE_NAME = getenv("MY_NODE_NAME")
 MY_POD_NAMESPACE = getenv("MY_POD_NAMESPACE", "default")
 
+HISTORY_FILES_DIRNAME = "history_files/"
+N_HISTORY_FILES = 10
+JSON_LD_OUTPUT_FILE = "incoming_json_ld_{timestamp}.jsonld"
+
 
 def find_jena_ip():
     global fuseki, fuseki_jena_url
@@ -75,6 +80,28 @@ def find_jena_ip():
     logger.info(f"Using for Jena Fuseki: {fuseki.url}")
 
 
+def cleanup_old_files(directory, pattern, max_files):
+    """Keeps only the latest 'max_files' files in 'directory' and deletes older ones."""
+    files = sorted(glob(path.join(directory, pattern)), key=path.getmtime, reverse=True)
+
+    if len(files) > max_files:
+        for file in files[max_files:]:
+            remove(file)
+            logger.info(f"Deleted old history file: {file}")
+
+
+def save_jsonld(data, timestamp):
+    fname = HISTORY_FILES_DIRNAME + JSON_LD_OUTPUT_FILE.format(timestamp=timestamp)
+
+    makedirs(HISTORY_FILES_DIRNAME, exist_ok=True)
+    with open(fname, "w", encoding="utf-8") as f:
+        dump(data, f, indent=4, ensure_ascii=False)
+    logger.info(f"Saved JSON-LD into a history file: {fname}")
+
+    pattern = sub(r"\{timestamp\}", "*", JSON_LD_OUTPUT_FILE)
+    cleanup_old_files(HISTORY_FILES_DIRNAME, pattern, N_HISTORY_FILES)
+
+
 @router.get(
     "/",
     status_code=HTTP_303_SEE_OTHER,
@@ -102,6 +129,7 @@ async def update_graph(
     graph_name += f"timestamp:{ts}"
     body["@id"] = graph_name
 
+    save_jsonld(body, ts)
     json_ld_str = dumps(body)
 
     g = ConjunctiveGraph()
