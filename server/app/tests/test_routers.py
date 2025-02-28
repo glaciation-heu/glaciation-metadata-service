@@ -27,7 +27,7 @@ def test__update_graph__redirected() -> None:
         json=json_input,
     )
     assert response.status_code == HTTP_200_OK
-    assert response.json() == "Success"
+    assert "Success" in response.json()
 
     json_input = {"incorrect": "JSON-LD"}
     response = client.patch(

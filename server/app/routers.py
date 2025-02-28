@@ -159,7 +159,7 @@ async def update_graph(
         if "KUBERNETES_SERVICE_HOST" in environ:
             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
-    return "Success"
+    return f"Success - Inserted {n_triples} triple(s) into graph <{graph_name}>."
 
 
 @router.get(
