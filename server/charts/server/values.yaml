@@ -1,9 +1,9 @@
 deployment:
-  enabled: true
+  enabled: false
   replicaCount: 1
 
 daemonset:
-  enabled: false
+  enabled: true
 
 image:
   repository: ""
