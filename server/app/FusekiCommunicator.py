@@ -1,5 +1,6 @@
 from typing import Literal, Tuple
 
+from loguru import logger
 from rdflib.plugins.sparql.parser import parseQuery, parseUpdate
 from SPARQLWrapper import JSON, SPARQLWrapper2
 from SPARQLWrapper.SmartWrapper import Bindings
@@ -68,14 +69,14 @@ class FusekiCommunicatior:
         self.sparql.setReturnFormat(JSON)
         try:
             return self.sparql.query()
-        except Exception as e:
-            print(e)
+        except Exception:
+            logger.exception("An error occured.")
             return None
 
-    def update_query(self, query: str) -> Bindings | QueryResult | None:
+    def update_query(self, query: str) -> Bindings | QueryResult:
         self.sparql.setQuery(query)
         try:
             return self.sparql.query()
         except Exception as e:
-            print(e)
-            return None
+            logger.exception("An error occured.")
+            raise e

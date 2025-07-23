@@ -205,6 +205,24 @@ async def search_graph(
     return EMPTY_SEARCH_RESPONSE
 
 
+def send_update_query_to_jena(query):
+    valid, msg = fuseki.validate_sparql(query, "update")
+
+    if valid:
+        find_jena_ip()
+
+        try:
+            fuseki.update_query(query)
+        except Exception as e:
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+
+        logger.debug(f'Performed "{query}".')
+    else:
+        logger.error(msg)
+        logger.debug(f"The query:\n{query}")
+        raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+
+
 @router.get(
     "/api/v0/graph/update",
 )
@@ -217,16 +235,7 @@ async def perform_update_query(
         queries = [query]
 
     for single_query in queries:
-        valid, msg = fuseki.validate_sparql(single_query, "update")
-
-        if valid:
-            find_jena_ip()
-            fuseki.update_query(single_query)
-            logger.debug(f'Performed "{single_query}".')
-        else:
-            logger.error(msg)
-            logger.debug(f"The query:\n{single_query}")
-            raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+        send_update_query_to_jena(single_query)
 
     return "Success"
 
@@ -250,16 +259,7 @@ async def perform_post_update_query(
         queries = [query["query"]]
 
     for single_query in queries:
-        valid, msg = fuseki.validate_sparql(single_query, "update")
-
-        if valid:
-            find_jena_ip()
-            fuseki.update_query(single_query)
-            logger.debug(f'Performed "{single_query}".')
-        else:
-            logger.error(msg)
-            logger.debug(f"The query:\n{single_query}")
-            raise HTTPException(HTTP_400_BAD_REQUEST, msg)
+        send_update_query_to_jena(single_query)
 
     return "Success"
 
