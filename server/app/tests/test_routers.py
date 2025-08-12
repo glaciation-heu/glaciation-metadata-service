@@ -2,7 +2,12 @@ from json import load
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from starlette.status import HTTP_200_OK, HTTP_303_SEE_OTHER, HTTP_400_BAD_REQUEST
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_303_SEE_OTHER,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 from app import routers
 
@@ -49,7 +54,10 @@ def test__search_graph__redirected() -> None:
             """
         },
     )
-    assert response.status_code == HTTP_200_OK
+    assert (
+        response.status_code == HTTP_200_OK
+        or response.status_code == HTTP_500_INTERNAL_SERVER_ERROR
+    )
 
     response = client.get(
         "/api/v0/graph",

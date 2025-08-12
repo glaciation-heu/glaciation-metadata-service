@@ -172,31 +172,36 @@ async def search_graph(
     valid, msg = fuseki.validate_sparql(query, "query")
 
     if valid:
-        find_jena_ip()
-        result = fuseki.read_query(query)
+        try:
+            find_jena_ip()
+            result = fuseki.read_query(query)
 
-        if type(result) is Bindings:
-            bindings = []
-            for item in result.bindings:
-                new_item: Dict[str, Any] = {}
-                for key in item:
-                    new_item[key] = {}
-                    for property in item[key].__dict__:
-                        if (
-                            property != "variable"
-                            and item[key].__dict__[property] is not None
-                        ):
-                            new_item[key][property] = item[key].__dict__[property]
-                            if property == "lang":
-                                new_item[key]["xml:lang"] = new_item[key].pop("lang")
-                bindings.append(new_item)
+            if type(result) is Bindings:
+                bindings = []
+                for item in result.bindings:
+                    new_item: Dict[str, Any] = {}
+                    for key in item:
+                        new_item[key] = {}
+                        for property in item[key].__dict__:
+                            if (
+                                property != "variable"
+                                and item[key].__dict__[property] is not None
+                            ):
+                                new_item[key][property] = item[key].__dict__[property]
+                                if property == "lang":
+                                    new_item[key]["xml:lang"] = new_item[key].pop(
+                                        "lang"
+                                    )
+                    bindings.append(new_item)
 
-            logger.debug(f"Found {len(bindings)} result(s).")
+                logger.debug(f"Found {len(bindings)} result(s).")
 
-            return SearchResponse(
-                head=ResponseHead(vars=result.head["vars"]),
-                results=ResponseResults(bindings=bindings),
-            )
+                return SearchResponse(
+                    head=ResponseHead(vars=result.head["vars"]),
+                    results=ResponseResults(bindings=bindings),
+                )
+        except Exception as e:
+            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
     else:
         logger.error(msg)
         logger.debug(f"The query:\n{query}")

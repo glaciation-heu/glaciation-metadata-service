@@ -69,9 +69,9 @@ class FusekiCommunicatior:
         self.sparql.setReturnFormat(JSON)
         try:
             return self.sparql.query()
-        except Exception:
+        except Exception as e:
             logger.exception("An error occured.")
-            return None
+            raise e
 
     def update_query(self, query: str) -> Bindings | QueryResult:
         self.sparql.setQuery(query)
