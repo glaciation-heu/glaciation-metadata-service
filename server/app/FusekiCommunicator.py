@@ -14,25 +14,12 @@ from SPARQLWrapper.Wrapper import QueryResult
 
 class FusekiCommunicatior:
     def __init__(
-        self, fuseki_url: str, port: int | str | None, dataset_name: str
+        self,
+        fuseki_url: str,
+        port: int | str | None,
+        dataset_name: str,
+        timeout_seconds: int = 30,
     ) -> None:
-        """
-        The function initializes a SPARQLWrapper2 object with the provided Fuseki URL,
-        port, and dataset name.
-
-        :param fuseki_url: The `fuseki_url` parameter is a string that represents the
-        URL of the Fuseki server. Fuseki is a SPARQL server that provides a web
-        interface to query and manage RDF data
-        :type fuseki_url: str
-        :param port: The `port` parameter is the port number on which the Fuseki server
-        is running. It can be either an integer or a string representing the port number
-        :type port: int | str
-        :param dataset_name: The `dataset_name` parameter is a string that represents
-        the name of the dataset in Fuseki. Fuseki is a SPARQL server that provides a way
-        to query and manipulate RDF data. The `dataset_name` parameter is used to
-        specify which dataset you want to interact with in Fuseki
-        :type dataset_name: str
-        """
         self.fuseki_url = fuseki_url
         self.port = port
         self.dataset_name = dataset_name
@@ -44,6 +31,7 @@ class FusekiCommunicatior:
         )
         self.sparql = SPARQLWrapper2(self.url)
         self.sparql.method = "POST"
+        self.sparql.setTimeout(timeout_seconds)
 
     def validate_sparql(
         self, query: str, query_type: Literal["query", "update"]

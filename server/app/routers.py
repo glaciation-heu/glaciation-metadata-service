@@ -1,10 +1,10 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 from glob import glob
 from json import dump, dumps
 from os import environ, getenv, makedirs, path, remove
 from re import findall, sub
-from time import time
+from time import sleep, time
 
 from fastapi import APIRouter, HTTPException
 from kubernetes import client, config
@@ -35,8 +35,11 @@ router = APIRouter(tags=[TagEnum.GRAPH])
 fuseki_jena_url = getenv("TRIPLE_STORE_URL", "jena-fuseki")
 fuseki_jena_port = getenv("TRIPLE_STORE_PORT")
 fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
+JENA_TIMEOUT = int(getenv("JENA_TIMEOUT_SECONDS", "30"))
+_MAX_RETRIES = int(getenv("JENA_MAX_RETRIES", "3"))
+_RETRY_BASE_DELAY = float(getenv("JENA_RETRY_BASE_DELAY", "1.0"))
 fuseki = FusekiCommunicatior(
-    fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+    fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name, JENA_TIMEOUT
 )
 MY_NODE_NAME = getenv("MY_NODE_NAME")
 MY_POD_NAMESPACE = getenv("MY_POD_NAMESPACE", "default")
@@ -67,17 +70,60 @@ def find_jena_ip():
         if addresses[MY_NODE_NAME] != fuseki_jena_url:
             fuseki_jena_url = addresses[MY_NODE_NAME]
             fuseki = FusekiCommunicatior(
-                fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+                fuseki_jena_url,
+                fuseki_jena_port,
+                fuseki_jena_dataset_name,
+                JENA_TIMEOUT,
             )
     else:
         fuseki_jena_url_temp = getenv("TRIPLE_STORE_URL", "jena-fuseki")
         if fuseki_jena_url != fuseki_jena_url_temp:
             fuseki_jena_url = fuseki_jena_url_temp
             fuseki = FusekiCommunicatior(
-                fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name
+                fuseki_jena_url,
+                fuseki_jena_port,
+                fuseki_jena_dataset_name,
+                JENA_TIMEOUT,
             )
         logger.warning(f"Jena Fuseki could not be found on node '{MY_NODE_NAME}'.")
     logger.info(f"Using for Jena Fuseki: {fuseki.url}")
+
+
+def _post_with_retry(url, **kwargs):
+    """POST to Jena with a timeout and exponential-backoff retries."""
+    kwargs.setdefault("timeout", JENA_TIMEOUT)
+    last_exc: Exception = RuntimeError("unreachable")
+    for attempt in range(_MAX_RETRIES):
+        try:
+            return post(url, **kwargs)
+        except Exception as e:
+            last_exc = e
+            if attempt < _MAX_RETRIES - 1:
+                delay = _RETRY_BASE_DELAY * (2**attempt)
+                logger.warning(
+                    f"Jena POST attempt {attempt + 1}/{_MAX_RETRIES} failed: {e}. "
+                    f"Retrying in {delay:.1f}s..."
+                )
+                sleep(delay)
+    raise last_exc
+
+
+def _sparql_with_retry(fn: Callable[[], Any], description: str = "SPARQL") -> Any:
+    """Run a SPARQLWrapper call with exponential-backoff retries."""
+    last_exc: Exception = RuntimeError("unreachable")
+    for attempt in range(_MAX_RETRIES):
+        try:
+            return fn()
+        except Exception as e:
+            last_exc = e
+            if attempt < _MAX_RETRIES - 1:
+                delay = _RETRY_BASE_DELAY * (2**attempt)
+                logger.warning(
+                    f"{description} attempt {attempt + 1}/{_MAX_RETRIES} failed: {e}. "
+                    f"Retrying in {delay:.1f}s..."
+                )
+                sleep(delay)
+    raise last_exc
 
 
 def cleanup_old_files(directory, pattern, max_files):
@@ -144,7 +190,7 @@ async def update_graph(
 
     try:
         find_jena_ip()
-        response = post(
+        response = _post_with_retry(
             fuseki.url,
             data=json_ld_str,
             headers={"Content-Type": "application/ld+json"},
@@ -174,7 +220,7 @@ async def search_graph(
     if valid:
         try:
             find_jena_ip()
-            result = fuseki.read_query(query)
+            result = _sparql_with_retry(lambda: fuseki.read_query(query), "SPARQL read")
 
             if type(result) is Bindings:
                 bindings = []
@@ -217,7 +263,7 @@ def send_update_query_to_jena(query):
         find_jena_ip()
 
         try:
-            fuseki.update_query(query)
+            _sparql_with_retry(lambda: fuseki.update_query(query), "SPARQL update")
         except Exception as e:
             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
@@ -280,7 +326,7 @@ async def perform_compaction() -> str:
     params = {"deleteOld": "true"}
 
     try:
-        response = post(url, params=params)
+        response = _post_with_retry(url, params=params)
 
         if response.status_code == 200:
             logger.info("Compaction triggered successfully!")

@@ -18,6 +18,9 @@ INTERVAL_TO_CHECK_IN_SECONDS = int(float(getenv("INTERVAL_TO_CHECK_IN_SECONDS", 
 COMPACTION_INTERVAL_IN_SECONDS = int(
     float(getenv("COMPACTION_INTERVAL_IN_SECONDS", "3600"))
 )
+_REQUEST_TIMEOUT = int(float(getenv("REQUEST_TIMEOUT_SECONDS", "30")))
+_MAX_RETRIES = int(float(getenv("MAX_RETRIES", "3")))
+_RETRY_BASE_DELAY = float(getenv("RETRY_BASE_DELAY", "1.0"))
 
 
 def read_file(fname):
@@ -37,7 +40,8 @@ def local_query(query: str, update_query: bool = False) -> Any:
     full_url = f"{base_url}?{encoded_query}"
 
     try:
-        response = requests.get(full_url)
+        response = requests.get(full_url, timeout=_REQUEST_TIMEOUT)
+        response.raise_for_status()
         return response.json()
     except Exception as e:
         logger.error(e)
@@ -62,22 +66,25 @@ def get_timestamps() -> Dict[str, int]:
 
 def compaction() -> None:
     url = "http://localhost:80/api/v0/graph/compact"
-    compacted = False
 
-    while not compacted:
+    for attempt in range(_MAX_RETRIES):
         try:
-            response = requests.post(url)
+            response = requests.post(url, timeout=_REQUEST_TIMEOUT)
             if response.status_code == 200:
                 logger.info("Compaction triggered successfully!")
                 logger.debug(response.text)
             else:
                 logger.error(f"Compaction failed: {response.text}")
-            compacted = True
+            return
         except Exception as e:
             logger.exception(
-                f"An unexpected error occurred during compaction: {str(e)}"
+                f"Compaction attempt {attempt + 1}/{_MAX_RETRIES} failed: {e}"
             )
-            sleep(1)
+            if attempt < _MAX_RETRIES - 1:
+                delay = _RETRY_BASE_DELAY * (2**attempt)
+                logger.info(f"Retrying compaction in {delay:.1f}s...")
+                sleep(delay)
+    logger.error(f"Compaction gave up after {_MAX_RETRIES} attempts.")
 
 
 def job():

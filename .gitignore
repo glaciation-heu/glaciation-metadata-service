@@ -587,3 +587,5 @@ MigrationBackup/
 .helm
 
 .dist
+
+history_files
