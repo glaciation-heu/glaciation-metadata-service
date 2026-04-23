@@ -35,7 +35,7 @@ router = APIRouter(tags=[TagEnum.GRAPH])
 fuseki_jena_url = getenv("TRIPLE_STORE_URL", "jena-fuseki")
 fuseki_jena_port = getenv("TRIPLE_STORE_PORT")
 fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
-JENA_TIMEOUT = int(getenv("JENA_TIMEOUT_SECONDS", "30"))
+JENA_TIMEOUT = int(getenv("JENA_TIMEOUT_SECONDS", "10"))
 _MAX_RETRIES = int(getenv("JENA_MAX_RETRIES", "3"))
 _RETRY_BASE_DELAY = float(getenv("JENA_RETRY_BASE_DELAY", "1.0"))
 fuseki = FusekiCommunicatior(
