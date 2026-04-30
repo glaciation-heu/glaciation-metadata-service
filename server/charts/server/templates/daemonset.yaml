@@ -45,20 +45,11 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            - name: TRIPLE_STORE_URL
-              value: "{{ .Values.tripleStoreAddress.url }}"
-            - name: TRIPLE_STORE_PORT
-              value: "{{ .Values.tripleStoreAddress.port }}"
-            - name: TRIPLE_STORE_DATASET
-              value: "{{ .Values.tripleStoreAddress.datasetName }}"
-            - name: MY_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
-            - name: MY_POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
+            - name: STORE_PATH
+              value: "{{ .Values.graphStore.hostPath }}"
+          volumeMounts:
+            - name: graph-store
+              mountPath: "{{ .Values.graphStore.hostPath }}"
         - name: drop-graphs-sidecar
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -84,4 +75,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: graph-store
+          hostPath:
+            path: "{{ .Values.graphStore.hostPath }}"
+            type: DirectoryOrCreate
 {{- end }}

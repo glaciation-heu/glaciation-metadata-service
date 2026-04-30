@@ -1,17 +1,13 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from glob import glob
 from json import dump, dumps
-from os import environ, getenv, makedirs, path, remove
+from os import getenv, makedirs, path, remove
 from re import findall, sub
 from time import sleep, time
 
 from fastapi import APIRouter, HTTPException
-from kubernetes import client, config
 from loguru import logger
-from rdflib import ConjunctiveGraph
-from requests import post
-from SPARQLWrapper.SmartWrapper import Bindings
 from starlette.responses import RedirectResponse
 from starlette.status import (
     HTTP_303_SEE_OTHER,
@@ -19,8 +15,8 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from app.consts import EMPTY_SEARCH_RESPONSE, TagEnum
-from app.FusekiCommunicator import FusekiCommunicatior
+from app.consts import TagEnum
+from app.GraphStore import GraphStore
 from app.schemas import (
     ResponseHead,
     ResponseResults,
@@ -32,84 +28,18 @@ from app.schemas import (
 
 router = APIRouter(tags=[TagEnum.GRAPH])
 
-fuseki_jena_url = getenv("TRIPLE_STORE_URL", "jena-fuseki")
-fuseki_jena_port = getenv("TRIPLE_STORE_PORT")
-fuseki_jena_dataset_name = getenv("TRIPLE_STORE_DATASET", "slice")
-JENA_TIMEOUT = int(getenv("JENA_TIMEOUT_SECONDS", "10"))
-_MAX_RETRIES = int(getenv("JENA_MAX_RETRIES", "3"))
-_RETRY_BASE_DELAY = float(getenv("JENA_RETRY_BASE_DELAY", "1.0"))
-fuseki = FusekiCommunicatior(
-    fuseki_jena_url, fuseki_jena_port, fuseki_jena_dataset_name, JENA_TIMEOUT
-)
-MY_NODE_NAME = getenv("MY_NODE_NAME")
-MY_POD_NAMESPACE = getenv("MY_POD_NAMESPACE", "default")
+STORE_PATH = getenv("STORE_PATH")
+_MAX_RETRIES = int(getenv("MAX_RETRIES", "3"))
+_RETRY_BASE_DELAY = float(getenv("RETRY_BASE_DELAY", "1.0"))
+store = GraphStore(STORE_PATH)
 
 HISTORY_FILES_DIRNAME = "history_files/"
 N_HISTORY_FILES = 10
 JSON_LD_OUTPUT_FILE = "incoming_json_ld_{timestamp}.jsonld"
 
 
-def find_jena_ip():
-    global fuseki, fuseki_jena_url
-    if "KUBERNETES_SERVICE_HOST" in environ:
-        config.load_incluster_config()
-    else:
-        logger.error("Not running in a Kubernetes cluster.")
-        return
-
-    # Initialize the API client
-    v1 = client.CoreV1Api()
-
-    # List Jena Fuseki pods in their namespace
-    label_selector = "app.kubernetes.io/name=jena-fuseki"
-    pods = v1.list_namespaced_pod(MY_POD_NAMESPACE, label_selector=label_selector)
-
-    addresses = {pod.spec.node_name: pod.status.pod_ip for pod in pods.items}
-
-    if MY_NODE_NAME in addresses:
-        if addresses[MY_NODE_NAME] != fuseki_jena_url:
-            fuseki_jena_url = addresses[MY_NODE_NAME]
-            fuseki = FusekiCommunicatior(
-                fuseki_jena_url,
-                fuseki_jena_port,
-                fuseki_jena_dataset_name,
-                JENA_TIMEOUT,
-            )
-    else:
-        fuseki_jena_url_temp = getenv("TRIPLE_STORE_URL", "jena-fuseki")
-        if fuseki_jena_url != fuseki_jena_url_temp:
-            fuseki_jena_url = fuseki_jena_url_temp
-            fuseki = FusekiCommunicatior(
-                fuseki_jena_url,
-                fuseki_jena_port,
-                fuseki_jena_dataset_name,
-                JENA_TIMEOUT,
-            )
-        logger.warning(f"Jena Fuseki could not be found on node '{MY_NODE_NAME}'.")
-    logger.info(f"Using for Jena Fuseki: {fuseki.url}")
-
-
-def _post_with_retry(url, **kwargs):
-    """POST to Jena with a timeout and exponential-backoff retries."""
-    kwargs.setdefault("timeout", JENA_TIMEOUT)
-    last_exc: Exception = RuntimeError("unreachable")
-    for attempt in range(_MAX_RETRIES):
-        try:
-            return post(url, **kwargs)
-        except Exception as e:
-            last_exc = e
-            if attempt < _MAX_RETRIES - 1:
-                delay = _RETRY_BASE_DELAY * (2**attempt)
-                logger.warning(
-                    f"Jena POST attempt {attempt + 1}/{_MAX_RETRIES} failed: {e}. "
-                    f"Retrying in {delay:.1f}s..."
-                )
-                sleep(delay)
-    raise last_exc
-
-
 def _sparql_with_retry(fn: Callable[[], Any], description: str = "SPARQL") -> Any:
-    """Run a SPARQLWrapper call with exponential-backoff retries."""
+    """Run a GraphStore call with exponential-backoff retries."""
     last_exc: Exception = RuntimeError("unreachable")
     for attempt in range(_MAX_RETRIES):
         try:
@@ -178,9 +108,11 @@ async def update_graph(
     save_jsonld(body, ts)
     json_ld_str = dumps(body)
 
-    g = ConjunctiveGraph()
-    g.parse(data=json_ld_str, format="json-ld")
-    n_triples = len(g)
+    try:
+        n_triples = store.ingest_jsonld(json_ld_str)
+    except Exception as e:
+        logger.exception("Ingest failed")
+        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
     if n_triples == 0:
         logger.error("No triples could be extracted from JSON-LD.")
@@ -188,22 +120,7 @@ async def update_graph(
             HTTP_400_BAD_REQUEST, "No triples could be extracted from JSON-LD."
         )
 
-    try:
-        find_jena_ip()
-        response = _post_with_retry(
-            fuseki.url,
-            data=json_ld_str,
-            headers={"Content-Type": "application/ld+json"},
-        )
-        if response.status_code == 200:
-            logger.debug(f"Inserted {n_triples} triple(s) into graph <{graph_name}>.")
-        else:
-            logger.error(f"Response: {response.text}")
-            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
-    except Exception as e:
-        logger.exception("Error occured")
-        if "KUBERNETES_SERVICE_HOST" in environ:
-            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
+    logger.debug(f"Inserted {n_triples} triple(s) into graph <{graph_name}>.")
 
     return f"Success - Inserted {n_triples} triple(s) into graph <{graph_name}>."
 
@@ -215,37 +132,16 @@ async def search_graph(
     query: SPARQLQuery,
 ) -> SearchResponse:
     """Execute SPARQL search query and return a response in JSON format."""
-    valid, msg = fuseki.validate_sparql(query, "query")
+    valid, msg = store.validate_sparql(query, "query")
 
     if valid:
         try:
-            find_jena_ip()
-            result = _sparql_with_retry(lambda: fuseki.read_query(query), "SPARQL read")
-
-            if type(result) is Bindings:
-                bindings = []
-                for item in result.bindings:
-                    new_item: Dict[str, Any] = {}
-                    for key in item:
-                        new_item[key] = {}
-                        for property in item[key].__dict__:
-                            if (
-                                property != "variable"
-                                and item[key].__dict__[property] is not None
-                            ):
-                                new_item[key][property] = item[key].__dict__[property]
-                                if property == "lang":
-                                    new_item[key]["xml:lang"] = new_item[key].pop(
-                                        "lang"
-                                    )
-                    bindings.append(new_item)
-
-                logger.debug(f"Found {len(bindings)} result(s).")
-
-                return SearchResponse(
-                    head=ResponseHead(vars=result.head["vars"]),
-                    results=ResponseResults(bindings=bindings),
-                )
+            result = _sparql_with_retry(lambda: store.read_query(query), "SPARQL read")
+            logger.debug(f"Found {len(result['bindings'])} result(s).")
+            return SearchResponse(
+                head=ResponseHead(vars=result["vars"]),
+                results=ResponseResults(bindings=result["bindings"]),
+            )
         except Exception as e:
             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
     else:
@@ -253,17 +149,13 @@ async def search_graph(
         logger.debug(f"The query:\n{query}")
         raise HTTPException(HTTP_400_BAD_REQUEST, msg)
 
-    return EMPTY_SEARCH_RESPONSE
 
-
-def send_update_query_to_jena(query):
-    valid, msg = fuseki.validate_sparql(query, "update")
+def _execute_update_query(query):
+    valid, msg = store.validate_sparql(query, "update")
 
     if valid:
-        find_jena_ip()
-
         try:
-            _sparql_with_retry(lambda: fuseki.update_query(query), "SPARQL update")
+            _sparql_with_retry(lambda: store.update_query(query), "SPARQL update")
         except Exception as e:
             raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
 
@@ -286,7 +178,7 @@ async def perform_update_query(
         queries = [query]
 
     for single_query in queries:
-        send_update_query_to_jena(single_query)
+        _execute_update_query(single_query)
 
     return "Success"
 
@@ -310,7 +202,7 @@ async def perform_post_update_query(
         queries = [query["query"]]
 
     for single_query in queries:
-        send_update_query_to_jena(single_query)
+        _execute_update_query(single_query)
 
     return "Success"
 
@@ -319,22 +211,11 @@ async def perform_post_update_query(
     "/api/v0/graph/compact",
 )
 async def perform_compaction() -> str:
-    find_jena_ip()
-    port_placeholder = f":{fuseki_jena_port}" if fuseki_jena_port is not None else ""
-    url = f"http://{fuseki_jena_url}{port_placeholder}/$/compact/{fuseki_jena_dataset_name}"
-
-    params = {"deleteOld": "true"}
-
+    """Optimize the graph store."""
     try:
-        response = _post_with_retry(url, params=params)
-
-        if response.status_code == 200:
-            logger.info("Compaction triggered successfully!")
-            logger.debug(response.text)
-            return "Success"
-        else:
-            logger.error(f"Compaction failed: {response.text}")
-            raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, response.text)
+        store.optimize()
+        logger.info("Store optimization completed successfully.")
+        return "Success"
     except Exception as e:
-        logger.exception("An unexpected error occurred during compaction.")
+        logger.exception("An unexpected error occurred during optimization.")
         raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, str(e))
